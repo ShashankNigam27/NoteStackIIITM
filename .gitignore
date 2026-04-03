@@ -205,3 +205,14 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+#Added manually
+serviceAccountKey.json
+__pycache__/
+*.pyc
+*.pkl 
+backend/models/RGPV
+backend/training/training_data.json1
+backend/training/raw_papers/
+.DS_Store
+Thumbs.db
