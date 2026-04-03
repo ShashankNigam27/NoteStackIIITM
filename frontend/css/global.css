@@ -1,0 +1,76 @@
+/* Core Typography Forms */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-headline {
+    font-family: 'Newsreader', serif;
+}
+
+/* Geometric Layout */
+.hero-grid {
+    background-color: #ffffff;
+    background-image:
+        linear-gradient(#E0FFFF 1px, transparent 1px),
+        linear-gradient(90deg, #E0FFFF 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.flight-path {
+    stroke-dasharray: 8 8;
+    fill: none;
+    stroke: #6b7280; /* slate-500 */
+    stroke-width: 2;
+    opacity: 0.3;
+    animation: dash-flow 20s linear infinite;
+}
+
+@keyframes dash-flow {
+    from { stroke-dashoffset: 200; }
+    to { stroke-dashoffset: 0; }
+}
+
+.plane-entrance {
+    animation: plane-fly-in 2.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+@keyframes plane-fly-in {
+    0% { 
+        transform: scaleX(var(--mirror, 1)) translate(var(--fly-x, -100px), var(--fly-y, -100px)) scale(0.3) rotate(calc(var(--base-rotate, 0deg) - 20deg));
+        opacity: 0;
+    }
+    100% { 
+        transform: scaleX(var(--mirror, 1)) translate(0, 0) scale(1) rotate(var(--base-rotate, 0deg));
+        opacity: 1;
+    }
+}
+
+.plane-float {
+    animation: float 4s ease-in-out infinite;
+    animation-delay: 2.5s; /* Start after entrance */
+}
+
+@keyframes float {
+    0%, 100% { transform: scaleX(var(--mirror, 1)) translateY(0) rotate(var(--base-rotate, 0deg)); }
+    50% { transform: scaleX(var(--mirror, 1)) translateY(-15px) rotate(calc(var(--base-rotate, 0deg) + 8deg)); }
+}
+
+/* Structural Components */
+.brutalist-shadow {
+    box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
+}
+
+.hard-shadow {
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
+}
