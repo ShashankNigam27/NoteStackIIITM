@@ -1,0 +1,17 @@
+flask 
+flask-cors 
+firebase-admin 
+python-dotenv 
+PyMuPDF
+pytesseract
+Pillow 
+scikit-learn 
+numpy 
+torch 
+transformers
+sentencepiece 
+google-genai 
+fpdf2 
+spacy 
+nltk 
+rouge-score
