@@ -15,3 +15,4 @@ fpdf2
 spacy 
 nltk 
 rouge-score
+flask-login
