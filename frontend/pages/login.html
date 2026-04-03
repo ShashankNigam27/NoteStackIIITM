@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}NoteStack | Study Buddy Login{% endblock %}
+
+{% block body_class %}bg-neutral-950 text-on-background min-h-screen flex items-center justify-center p-6 selection:bg-secondary-container selection:text-on-secondary-container{% endblock %}
+
+{% block content %}
+<!-- Suppressed Navigation Shell for Login Journey -->
+<main class="w-full max-w-md">
+<!-- Brand Identity Section -->
+<div class="mb-12 text-center">
+<div class="inline-block bg-primary p-4 mb-6">
+<span class="text-4xl font-black italic tracking-tighter text-white uppercase">NoteStack</span>
+</div>
+<p class="text-neutral-400 font-label tracking-[0.2em] uppercase text-xs">Your Smart Study Buddy</p>
+</div>
+<!-- Login Card -->
+<div class="bg-surface border-4 border-primary p-8 md:p-12 brutalist-shadow">
+<header class="mb-10">
+<h1 class="text-4xl text-primary leading-none mb-2">Welcome Back, Student.</h1>
+<p class="text-on-surface-variant font-body text-sm">Resume your exam preparation.</p>
+</header>
+<form action="{{ url_for('login') }}" class="space-y-8" method="POST">
+<!-- Email Field -->
+<div class="flex flex-col space-y-2">
+<label class="font-label text-xs font-bold uppercase tracking-widest text-on-surface" for="college-email">College Email</label>
+<input required class="input-academic bg-transparent border-t-0 border-x-0 border-b-2 border-outline py-3 text-lg font-body placeholder:text-neutral-300 focus:ring-0 transition-all" id="college-email" name="college-email" placeholder="student@college.edu" type="email"/>
+</div>
+<!-- Password Field -->
+<div class="flex flex-col space-y-2 relative">
+<div class="flex justify-between items-center">
+<label class="font-label text-xs font-bold uppercase tracking-widest text-on-surface" for="password">Password</label>
+<a class="text-[10px] uppercase font-bold text-primary hover:underline" href="index.html">Forgot Access?</a>
+</div>
+<div class="relative">
+<input class="input-academic w-full bg-transparent border-t-0 border-x-0 border-b-2 border-outline py-3 text-lg font-body placeholder:text-neutral-300 focus:ring-0 transition-all" id="password" name="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-0 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-primary transition-colors focus:outline-none" type="button">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+<!-- Flash errors -->
+{% with messages = get_flashed_messages() %}
+ {% if messages %}
+ {% for message in messages %}
+ <div class="flex items-center space-x-2 text-error animate-pulse">
+ <span class="material-symbols-outlined text-sm" data-icon="error">error</span>
+ <p class="text-xs font-bold uppercase tracking-tight">{{ message }}</p>
+ </div>
+ {% endfor %}
+ {% endif %}
+{% endwith %}
+
+<!-- Google Sign-In OR Divider -->
+<div class="relative flex items-center py-4">
+    <div class="flex-grow border-t border-outline-variant opacity-30"></div>
+    <span class="mx-4 font-label text-[10px] font-bold uppercase tracking-widest text-neutral-400 shrink-0">OR CONTINUE WITH</span>
+    <div class="flex-grow border-t border-outline-variant opacity-30"></div>
+</div>
+
+<button id="google-login-btn" type="button" class="w-full flex items-center justify-center gap-4 bg-white border-2 border-neutral-200 py-4 px-6 font-label font-black uppercase tracking-widest text-neutral-700 hover:bg-neutral-50 transition-all btn-brutalist">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6 h-6" alt="Google">
+    Login with Google
+</button>
+
+<!-- Login Button -->
+<button class="group relative w-full bg-primary-container border-primary py-4 px-6 flex items-center justify-center space-x-3 hover:bg-primary transition-colors duration-150 btn-brutalist" type="submit">
+<span class="text-white font-label font-black uppercase tracking-widest">Login to Dashboard</span>
+<span class="material-symbols-outlined text-white transition-transform group-hover:translate-x-1" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</form>
+<!-- Divider -->
+<div class="relative my-10 flex items-center">
+<div class="flex-grow border-t border-outline-variant opacity-30"></div>
+<span class="mx-4 font-label text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-400 shrink-0">New to NoteStack?</span>
+<div class="flex-grow border-t border-outline-variant opacity-30"></div>
+</div>
+<!-- Registration Link -->
+<a class="block w-full text-center bg-secondary-container border-2 border-secondary py-4 px-6 font-label font-black uppercase tracking-widest text-on-secondary-container hover:bg-secondary-fixed-dim transition-colors duration-150" href="{{ url_for('register') }}">
+ Register New Account
+ </a>
+</div>
+<!-- Footer / Background Decoration -->
+<footer class="mt-12 text-center">
+<p class="text-neutral-600 text-[10px] font-label uppercase tracking-widest leading-relaxed">
+ NoteStack Study Buddy Platform © 2024<br/>
+ Smart Exam-Prep Environment
+ </p>
+</footer>
+</main>
+<!-- Visual Polish: Background Graphic -->
+<div class="fixed top-0 left-0 w-full h-full -z-10 opacity-10 pointer-events-none">
+<div class="absolute top-10 left-10 text-white font-headline text-[15rem] leading-none select-none">Ω</div>
+<div class="absolute bottom-10 right-10 text-white font-headline text-[15rem] leading-none select-none opacity-20">Σ</div>
+<div class="absolute top-1/2 left-1/4 w-[1px] h-screen bg-primary opacity-20"></div>
+<div class="absolute top-1/2 right-1/4 w-[1px] h-screen bg-primary opacity-20"></div>
+</div>
+</div>
+{% endblock %}

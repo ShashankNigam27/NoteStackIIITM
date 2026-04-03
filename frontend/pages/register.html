@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Register | NoteStack Study Buddy{% endblock %}
+
+{% block extra_styles %}
+/* Custom form styles moved to style.css */
+{% endblock %}
+
+{% block body_class %}bg-neutral-950 text-on-background min-h-screen flex items-center justify-center p-6 selection:bg-secondary-container selection:text-on-secondary-container{% endblock %}
+
+{% block content %}
+<!-- Visual Polish: Background Graphic -->
+<div class="fixed top-0 left-0 w-full h-full -z-10 opacity-10 pointer-events-none">
+<div class="absolute top-10 left-10 text-white font-headline text-[15rem] leading-none select-none">Ω</div>
+<div class="absolute bottom-10 right-10 text-white font-headline text-[15rem] leading-none select-none opacity-20">Σ</div>
+<div class="absolute top-1/2 left-1/4 w-[1px] h-screen bg-primary opacity-20"></div>
+<div class="absolute top-1/2 right-1/4 w-[1px] h-screen bg-primary opacity-20"></div>
+</div>
+<!-- Main Registration Shell -->
+<main class="w-full max-w-[560px] bg-surface-container-lowest shadow-[12px_12px_0px_rgba(183,0,17,0.3)] border-r-4 border-b-4 border-primary">
+<!-- Header Section -->
+<header class="p-8 md:p-12 bg-surface">
+<div class="flex items-center justify-between mb-8">
+<span class="text-3xl font-black italic tracking-tighter text-primary">NoteStack</span>
+<span class="material-symbols-outlined text-primary text-4xl" data-icon="school">school</span>
+</div>
+<h1 class="text-5xl md:text-6xl text-on-surface leading-none tracking-tight mb-4">
+ JOIN THE PREP SQUAD
+ </h1>
+<p class="text-on-surface-variant font-medium uppercase tracking-widest text-sm">
+ Join the smart network for exam-prep success.
+ </p>
+</header>
+<!-- Form Section -->
+<section class="p-8 md:p-12 pt-0">
+<form action="{{ url_for('register') }}" class="space-y-8" method="POST">
+<!-- Full Name -->
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Full Name</label>
+<input name="full_name" required class="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-outline py-3 px-0 text-lg font-medium placeholder:text-surface-variant focus:ring-0" placeholder="e.g. JULIAN S. MORIARTY" type="text"/>
+</div>
+<!-- College Email -->
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">College Email</label>
+<input name="email" required class="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-outline py-3 px-0 text-lg font-medium placeholder:text-surface-variant focus:ring-0" placeholder="student@university.edu" type="email"/>
+</div>
+<!-- Password -->
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Password</label>
+<input name="password" required class="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-outline py-3 px-0 text-lg font-medium placeholder:text-surface-variant focus:ring-0" placeholder="••••••••••••" type="password"/>
+</div>
+<!-- University -->
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">College / Campus</label>
+<input name="university" class="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-outline py-3 px-0 text-lg font-medium placeholder:text-surface-variant focus:ring-0" placeholder="e.g. VTU or Anna University" type="text"/>
+</div>
+<!-- Dropdowns Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Branch -->
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Academic Branch</label>
+<select name="department" class="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-outline py-3 px-0 text-lg font-medium appearance-none focus:ring-0">
+<option disabled="" selected="" value="">Select Branch</option>
+<option value="CSE">CSE</option>
+<option value="IT">IT</option>
+<option value="ECE">ECE</option>
+<option value="EE">EE</option>
+<option value="ME">ME</option>
+<option value="CE">CE</option>
+</select>
+</div>
+<!-- Semester -->
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Current Semester</label>
+<select class="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-outline py-3 px-0 text-lg font-medium appearance-none focus:ring-0">
+<option disabled="" selected="" value="">Select Semester</option>
+<option value="1">Semester 1</option>
+<option value="2">Semester 2</option>
+<option value="3">Semester 3</option>
+<option value="4">Semester 4</option>
+<option value="5">Semester 5</option>
+<option value="6">Semester 6</option>
+<option value="7">Semester 7</option>
+<option value="8">Semester 8</option>
+</select>
+</div>
+</div>
+<!-- Consent Checkbox -->
+<div class="flex items-start gap-4 p-4 bg-surface-container-low border-l-4 border-secondary-container">
+<div class="pt-1">
+<input class="w-5 h-5 cursor-pointer" id="consent" type="checkbox"/>
+</div>
+<label class="text-sm text-on-surface-variant leading-relaxed cursor-pointer" for="consent">
+ I agree to contribute my anonymized notes to the NoteStack Prep Database to improve study materials for the collective good.
+ </label>
+</div>
+<!-- Google Sign-In OR Divider -->
+<div class="relative flex items-center py-4">
+    <div class="flex-grow border-t border-outline-variant opacity-30"></div>
+    <span class="mx-4 font-label text-[10px] font-bold uppercase tracking-widest text-neutral-400 shrink-0">OR CONTINUE WITH</span>
+    <div class="flex-grow border-t border-outline-variant opacity-30"></div>
+</div>
+
+<button id="google-signin-btn" type="button" class="w-full flex items-center justify-center gap-4 bg-white border-2 border-neutral-200 py-4 px-6 font-label font-black uppercase tracking-widest text-neutral-700 hover:bg-neutral-50 transition-all btn-brutalist">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6 h-6" alt="Google">
+    Signup with Google
+</button>
+
+<!-- Submit Button -->
+<button class="group relative w-full bg-primary-container text-on-primary-container py-5 text-xl font-black uppercase tracking-tighter hover:bg-primary flex items-center justify-center gap-3 btn-brutalist" type="submit">
+ Create Account &amp; Start Preparing
+ <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<!-- Flash errors -->
+{% with messages = get_flashed_messages() %}
+ {% if messages %}
+ {% for message in messages %}
+ <div class="flex items-center gap-3 py-3 px-4 bg-red-50 border border-red-200 text-red-800">
+ <span class="material-symbols-outlined text-red-600" data-icon="error" style="font-variation-settings: 'FILL' 1;">error</span>
+ <span class="text-sm font-bold uppercase tracking-tight">{{ message }}</span>
+ </div>
+ {% endfor %}
+ {% endif %}
+{% endwith %}
+</form>
+</section>
+<!-- Footer Actions -->
+<footer class="p-8 bg-surface-container border-t-2 border-outline-variant flex flex-col md:flex-row items-center justify-between gap-4">
+<span class="text-on-surface-variant text-sm font-medium">Already part of the stack?</span>
+<a class="text-primary font-bold uppercase tracking-widest text-sm hover:underline flex items-center gap-1" href="{{ url_for('login') }}">
+ Login to Dashboard
+ <span class="material-symbols-outlined text-base" data-icon="login">login</span>
+</a>
+</footer>
+
+<!-- Footer / Background Decoration -->
+<footer class="mt-12 text-center">
+<p class="text-neutral-600 text-xs font-label uppercase tracking-[0.3em] leading-relaxed">
+ NoteStack Study Buddy Platform © 2024<br/>
+ ALL INTELLECTUAL PROPERTY RESERVED
+ </p>
+</footer>
+</main>
+{% endblock %}
