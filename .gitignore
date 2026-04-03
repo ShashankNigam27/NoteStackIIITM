@@ -216,3 +216,4 @@ backend/training/training_data.json1
 backend/training/raw_papers/
 .DS_Store
 Thumbs.db
+firebase-config.py
