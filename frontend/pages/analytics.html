@@ -1,0 +1,244 @@
+{% extends 'dashboard_base.html' %}
+
+{% block extra_styles %}
+h1, h2, h3, h4 {
+font-family: 'Newsreader', serif;
+}
+.brutalist-shadow {
+box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+}
+.active-nav {
+background-color: #fed01b; /* secondary-container */
+color: #000000;
+border: 2px solid #000000;
+font-weight: 700;
+transform: translateX(4px);
+}
+{% endblock %}
+
+{% block dashboard_content %}
+<!-- SideNavBar (Persistent Shell) -->
+
+
+<!-- TopNavBar Shell -->
+
+<!-- Content Canvas -->
+<div class="p-12 max-w-7xl mx-auto space-y-16">
+  <!-- Hero Header Section -->
+  <section class="flex flex-col md:flex-row md:items-end justify-between gap-8 border-l-[12px] border-primary pl-8">
+    <div>
+      <span
+        class="bg-secondary-container px-3 py-1 text-[10px] font-black uppercase tracking-widest text-on-secondary-container">Exam
+        Performance</span>
+      <h1 class="text-6xl font-headline mt-2 leading-none">Prep Analytics</h1>
+      <p class="text-neutral-500 font-body mt-4 max-w-xl text-lg">Detailed quantitative breakdown of your exam-prep
+        progress. High-frequency updates derived from your recent mock papers and note uploads.</p>
+    </div>
+  </section>
+  <!-- Stats Grid -->
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-0">
+    <div class="bg-white border-4 border-black p-8 flex flex-col justify-between h-48 -ml-1 first:ml-0">
+      <span class="text-[10px] font-black uppercase tracking-widest text-neutral-400">Total Tests</span>
+      <div class="flex items-baseline gap-2">
+        <span class="text-5xl font-headline leading-none">{{ total_tests }}</span>
+        <span class="text-primary font-black text-xl">↑</span>
+      </div>
+    </div>
+    <div class="bg-white border-4 border-black p-8 flex flex-col justify-between h-48 -ml-1">
+      <span class="text-[10px] font-black uppercase tracking-widest text-neutral-400">Avg Score</span>
+      <div class="flex items-baseline gap-2">
+        <span class="text-5xl font-headline leading-none">{{ avg_score }}%</span>
+        <span class="text-secondary font-black text-xl">★</span>
+      </div>
+    </div>
+    <div class="bg-white border-4 border-black p-8 flex flex-col justify-between h-48 -ml-1">
+      <span class="text-[10px] font-black uppercase tracking-widest text-neutral-400">Avg Time</span>
+      <div class="flex items-baseline gap-2">
+        <span class="text-5xl font-headline leading-none">{{ avg_time }}m</span>
+        <span class="text-slate-400 font-black text-xs uppercase italic">/test</span>
+      </div>
+    </div>
+    <div class="bg-white border-4 border-black p-8 flex flex-col justify-between h-48 -ml-1">
+      <span class="text-[10px] font-black uppercase tracking-widest text-neutral-400">Consistency</span>
+      <div class="flex items-baseline gap-2">
+        <span class="text-5xl font-headline leading-none">{{ (total_tests / (note_count + 1)) | round(1) }}</span>
+        <span class="text-slate-400 font-black text-[10px] uppercase italic">Tests/Note</span>
+      </div>
+    </div>
+    <div class="bg-secondary-container border-4 border-black p-8 flex flex-col justify-between h-48 -ml-1">
+      <span class="text-[10px] font-black uppercase tracking-widest text-on-secondary-container">Notes Uploaded</span>
+      <div class="flex items-baseline gap-2">
+        <span class="text-5xl font-headline leading-none">{{ note_count }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subject Readiness Map -->
+  <section class="space-y-8">
+    <div class="flex items-center justify-between">
+      <h3 class="text-4xl font-headline italic">Subject Readiness Map</h3>
+      <span class="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">Calculated via Note-to-Score
+        weighting</span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for sm in subject_mastery %}
+      <div
+        class="bg-white border-4 border-black p-6 flex flex-col gap-6 transition-all hover:-translate-y-1 hover:-translate-x-1 shadow-[8px_8px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_rgba(183,0,17,1)]">
+        <div class="flex justify-between items-start">
+          <h4 class="text-2xl font-black uppercase tracking-tighter leading-none max-w-[70%]">{{ sm.subject }}</h4>
+          <span
+            class="px-2 py-0.5 border-2 border-black text-[9px] font-black uppercase {% if sm.status == 'MASTERED' %}bg-green-400{% elif sm.status == 'CRITICAL' %}bg-primary text-white{% else %}bg-yellow-400{% endif %}">
+            {{ sm.status }}
+          </span>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between items-end">
+            <span class="text-[10px] font-black uppercase text-neutral-400">Readiness</span>
+            <span class="text-2xl font-headline">{{ sm.readiness }}%</span>
+          </div>
+          <div class="w-full h-4 bg-zinc-100 border-2 border-black overflow-hidden">
+            <div class="h-full bg-primary" style="width: {{ sm.readiness }}%;"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 border-t-2 border-zinc-100 pt-4">
+          <div class="flex flex-col">
+            <span class="text-[8px] font-black text-neutral-400 uppercase">Notes</span>
+            <span class="font-bold text-sm">{{ sm.note_count }}</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[8px] font-black text-neutral-400 uppercase">Tests</span>
+            <span class="font-bold text-sm">{{ sm.test_count }}</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[8px] font-black text-neutral-400 uppercase">Avg %</span>
+            <span class="font-bold text-sm">{{ sm.avg_score or '—' }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Subject Performance Benchmarking (Bar Graph) -->
+  <section
+    class="bg-white border-4 border-black p-10 space-y-12 transition-all hover:shadow-[12px_12px_0px_rgba(0,0,0,1)]">
+    <div class="flex items-center justify-between">
+      <h3 class="text-4xl font-headline italic">Subject Performance Benchmark</h3>
+      <span class="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 italic">Quantitative distribution
+        of mean scores</span>
+    </div>
+
+    <div
+      class="relative h-96 w-full flex items-end justify-around gap-6 px-8 pb-16 border-b-8 border-l-8 border-black bg-zinc-50/50 pt-10">
+      <!-- Ground Grid Lines -->
+      <div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-10">
+        <div class="border-t-2 border-black w-full"></div>
+        <div class="border-t-2 border-black w-full"></div>
+        <div class="border-t-2 border-black w-full"></div>
+        <div class="border-t-2 border-black w-full"></div>
+      </div>
+
+      {% if subject_mastery %}
+      {% for sm in subject_mastery %}
+      <div class="flex-1 flex flex-col items-center group relative h-full justify-end max-w-[80px]">
+        <!-- Bar -->
+        <div
+          class="w-full bg-[#fed01b] border-2 border-black transition-all group-hover:bg-primary group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:shadow-[4px_4px_0px_black]"
+          style="height: {{ sm.avg_score if sm.avg_score > 5 else 5 }}%;">
+          <!-- Tooltip -->
+          <div
+            class="opacity-0 group-hover:opacity-100 absolute -top-12 left-1/2 -translate-x-1/2 bg-black text-white px-3 py-1.5 text-[10px] font-black uppercase tracking-widest z-20 whitespace-nowrap border-2 border-white shadow-[4px_4px_0px_rgba(183,0,17,1)] transition-opacity">
+            AVG: {{ sm.avg_score }}%
+          </div>
+        </div>
+        <!-- Label -->
+        <div class="absolute -bottom-14 w-full flex items-center justify-center">
+          <span
+            class="text-[10px] font-black uppercase tracking-tighter text-black rotate-[-15deg] group-hover:rotate-0 transition-transform whitespace-nowrap bg-white border border-black px-1">
+            {{ sm.subject[:12] }}{% if sm.subject|length > 12 %}..{% endif %}
+          </span>
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="w-full h-full flex flex-col items-center justify-center text-zinc-300">
+        <span class="material-symbols-outlined text-6xl">bar_chart_4_bars</span>
+        <p class="text-xs font-black uppercase tracking-widest mt-4">Awaiting performance data...</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-zinc-400">
+      <span>0%</span>
+      <span>50% (PASS)</span>
+      <span>100% (MASTERY)</span>
+    </div>
+  </section>
+
+  <!-- Focus Points (Refined) -->
+  <div class="bg-black text-white border-4 border-black p-10 flex flex-col min-h-[400px]">
+    <h3 class="text-4xl font-headline mb-4 italic text-primary">Focus Points</h3>
+    <p class="text-[10px] uppercase tracking-widest font-bold text-zinc-500 mb-12">Priority subjects requiring immediate
+      revision & targeted tests</p>
+
+    <div class="flex-grow space-y-10">
+      {% if weak_topics %}
+      {% for topic in weak_topics %}
+      <div class="group cursor-default border-l-4 border-zinc-800 pl-6 py-2 hover:border-primary transition-colors">
+        <div class="flex justify-between items-end mb-3">
+          <h4
+            class="text-2xl font-black uppercase tracking-tighter leading-none group-hover:text-primary transition-colors italic">
+            {{ topic.subject }}
+          </h4>
+          <span class="text-primary font-black text-sm tracking-widest">{{ topic.avg_score }}%</span>
+        </div>
+        <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.15em] leading-relaxed max-w-md">
+          Identified performance gap. AI suggests 3 targeted practice rounds and immediate PYQ summary review for
+          high-yield topics.
+        </p>
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="flex flex-col items-center justify-center h-full text-center py-20">
+        <span class="material-symbols-outlined text-6xl mb-6 text-zinc-800">verified_user</span>
+        <p class="text-xs text-zinc-500 font-black uppercase tracking-[0.3em]">No critical weaknesses detected in
+          Current Stacks</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <a href="{{ url_for('ai_tools') }}" class="mt-12">
+      <button
+        class="w-full bg-primary text-white py-5 font-black uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-black transition-all shadow-[8px_8px_0px_rgba(255,255,255,1)] hover:shadow-[4px_4px_0px_#fed01b] active:translate-x-1 active:translate-y-1 active:shadow-none border-2 border-black">
+        Launch Targeted Recovery Mock →
+      </button>
+    </a>
+  </div>
+
+  <!-- Improvement Tip Card -->
+  <section class="bg-white border-l-[32px] border-primary border-4 border-black p-12">
+    <div class="flex flex-col md:flex-row gap-12 items-center">
+      <div class="flex-grow">
+        <span class="text-xs font-black uppercase tracking-[0.3em] text-primary mb-2 block">AI Study Strategy</span>
+        <h2 class="text-5xl font-headline mb-6">Strategic PYQ Mastery</h2>
+        <p class="text-xl font-body text-neutral-600 leading-relaxed">
+          Your current retention velocity shows a stabilization at <span
+            class="bg-secondary-container px-2 font-bold">{{ avg_score }}%</span>.
+          To break into the 90+ percentile, data suggests you transition from **theory review** to **timed constraint
+          tests**.
+          Use the "Exam Simulation" mode in AI Tools for subjects marked <span
+            class="text-primary font-black">CRITICAL</span> in your Readiness Map.
+        </p>
+      </div>
+      <div class="shrink-0">
+        <div class="w-64 h-48 bg-zinc-100 border-4 border-black flex items-center justify-center">
+          <span class="material-symbols-outlined text-8xl text-zinc-300">psychology</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
