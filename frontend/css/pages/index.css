@@ -1,0 +1,125 @@
+html {
+    scroll-behavior: smooth;
+}
+
+/* Page-specific styles for index */
+
+/* Hero Plane Animations */
+.plane-wrapper {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: translate 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.plane-trail {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+    color: rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+}
+
+.trail-path {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    stroke-linecap: round;
+}
+
+/* Fly-in Animations */
+.plane-tl-wrapper {
+    animation: flyInTL 1.2s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.plane-tr-wrapper {
+    animation: flyInTR 1.2s 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.plane-bl-wrapper {
+    animation: flyInBL 1.2s 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.plane-br-wrapper {
+    animation: flyInBR 1.2s 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.plane-tl-wrapper .trail-path {
+    animation: drawPath 1.2s 0.2s ease-out forwards;
+}
+
+.plane-tr-wrapper .trail-path {
+    animation: drawPath 1.2s 0.4s ease-out forwards;
+}
+
+.plane-bl-wrapper .trail-path {
+    animation: drawPath 1.2s 0.6s ease-out forwards;
+}
+
+.plane-br-wrapper .trail-path {
+    animation: drawPath 1.2s 0.8s ease-out forwards;
+}
+
+@keyframes flyInTL {
+    0% {
+        transform: translate(-300px, -300px) scale(0.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes flyInTR {
+    0% {
+        transform: translate(300px, -300px) scale(0.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes flyInBL {
+    0% {
+        transform: translate(-300px, 300px) scale(0.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes flyInBR {
+    0% {
+        transform: translate(300px, 300px) scale(0.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes drawPath {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* Hover States (from trigger-semester) REMOVED */
+
+/* Mirror Blue Plane (Plane TR) */
+.plane-tr {
+    transform: scaleY(-1);
+}

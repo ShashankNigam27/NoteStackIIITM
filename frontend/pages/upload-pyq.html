@@ -59,3 +59,35 @@
 
 {% block scripts %}
 {{ super() }}
+<script>
+document.getElementById('pyq-upload-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const file       = document.getElementById('pyq-file').files[0];
+  const subject    = document.getElementById('pyq-subject').value.trim();
+  const university = document.getElementById('pyq-university').value.trim();
+  const year       = document.getElementById('pyq-year').value.trim();
+
+  if (!file || !subject) {
+    alert('Please provide file and subject.');
+    return;
+  }
+
+  document.getElementById('pyq-loading').classList.remove('hidden');
+  document.getElementById('pyq-submit-btn').disabled = true;
+
+  try {
+    const result = await API.uploadPYQ(file, subject, university, year);
+    document.getElementById('pyq-loading').classList.add('hidden');
+    document.getElementById('pyq-result').classList.remove('hidden');
+    document.getElementById('pyq-status-msg').textContent =
+      `Submitted successfully. Status: ${result.status}. Extracted ${result.extracted_text ? result.extracted_text.length : 0} characters.`;
+  } catch(err) {
+    document.getElementById('pyq-loading').classList.add('hidden');
+    document.getElementById('pyq-status-msg').textContent = 'Upload failed: ' + err.message;
+    document.getElementById('pyq-result').classList.remove('hidden');
+  }
+
+  document.getElementById('pyq-submit-btn').disabled = false;
+});
+</script>
+{% endblock %}
