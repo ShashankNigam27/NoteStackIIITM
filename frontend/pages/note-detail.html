@@ -1,0 +1,170 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}{{ note.title if note else 'Note Detail' }} | NoteStack{% endblock %}
+{% block page_title %}Note Detail{% endblock %}
+
+{% block dashboard_content %}
+
+{% if not note %}
+<div class="max-w-xl mx-auto py-20 text-center space-y-4">
+  <span class="material-symbols-outlined text-6xl text-slate-300">note</span>
+  <h2 class="text-3xl font-black text-slate-500">Note not found.</h2>
+  <a href="{{ url_for('library') }}"
+    class="inline-block bg-primary text-white px-8 py-3 font-black uppercase tracking-widest text-xs btn-brutalist">←
+    Back to Library</a>
+</div>
+
+{% else %}
+<div class="max-w-4xl mx-auto space-y-10">
+
+  <!-- Breadcrumb -->
+  <nav class="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
+    <a href="{{ url_for('library') }}" class="hover:text-primary">Library</a>
+    <span>›</span>
+    <span class="text-slate-600">{{ note.subject }}</span>
+    <span>›</span>
+    <span class="text-on-surface">{{ note.title }}</span>
+  </nav>
+
+  <!-- Header -->
+  <div class="space-y-3">
+    <span
+      class="bg-secondary-container text-on-secondary-container px-3 py-1 text-[10px] font-black uppercase tracking-widest border border-black">{{
+      note.subject }}</span>
+    <h1 class="text-5xl font-headline font-black tracking-tight text-on-surface">{{ note.title }}</h1>
+    <div class="flex items-center gap-6 text-sm text-slate-500">
+      <span class="font-bold">By: <span class="text-on-surface">{{ note.author.full_name }}</span></span>
+      <span>{{ note.university or 'Unknown University' }}</span>
+      <span>{% if note.created_at and note.created_at.strftime %}{{ note.created_at.strftime('%d %b %Y') }}{% else %}Recently{% endif %}</span>
+    </div>
+  </div>
+
+  <!-- Keywords -->
+  {% if note.keywords_list %}
+  <div class="space-y-3">
+    <h3 class="text-xs font-black uppercase tracking-widest text-neutral-500">Extracted Keywords</h3>
+    <div class="flex flex-wrap gap-2">
+      {% for kw in note.keywords_list %}
+      <div class="bg-secondary-container px-4 py-2 font-bold text-sm uppercase tracking-tighter border-2 border-black">
+        # {{ kw }}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- AI Summary -->
+  {% if note.summary %}
+  <div class="bg-surface-container-low p-8 border-l-8 border-secondary-container space-y-3">
+    <div class="flex items-center gap-3">
+      <span class="material-symbols-outlined text-primary">auto_awesome</span>
+      <h3 class="text-xs font-black uppercase tracking-widest text-neutral-500">AI Summary</h3>
+    </div>
+    <p class="font-body text-base leading-relaxed text-on-surface whitespace-pre-line">{{ note.summary }}</p>
+  </div>
+  {% endif %}
+
+  <!-- Extracted Text (collapsed) -->
+  {% if note.extracted_text %}
+  <details class="border-2 border-outline group">
+    <summary
+      class="px-6 py-4 font-black uppercase text-xs tracking-widest cursor-pointer hover:bg-slate-50 flex items-center justify-between">
+      <span>Full Extracted Text ({{ note.extracted_text|length }} chars)</span>
+      <span class="material-symbols-outlined text-base transition-transform group-open:rotate-180">expand_more</span>
+    </summary>
+    <div class="px-6 py-6 border-t-2 border-outline">
+      <pre
+        class="font-body text-sm text-on-surface whitespace-pre-wrap overflow-x-auto leading-relaxed">{{ note.extracted_text }}</pre>
+    </div>
+  </details>
+  {% endif %}
+
+  <!-- Actions -->
+  <div class="flex gap-4 flex-wrap pt-4 border-t-2 border-outline-variant items-center">
+    
+    <div class="flex flex-col gap-1">
+      <label class="text-[9px] font-black uppercase tracking-widest text-neutral-500">Paper Length</label>
+      <select id="num-questions" class="bg-surface border-2 border-black px-3 py-2 font-bold text-xs focus:ring-0 outline-none cursor-pointer">
+        <option value="5" >5 Questions (Trial)</option>
+        <option value="10">10 Questions (Short)</option>
+        <option value="15">15 Questions (Medium)</option>
+        <option value="20" selected>20 Questions (Full Paper)</option>
+      </select>
+    </div>
+
+    <button id="gen-paper-btn"
+      class="px-6 py-[11px] mt-4 bg-primary text-white font-black uppercase tracking-widest text-xs btn-brutalist flex items-center gap-2"
+      onclick="generatePaper('{{ note.id }}')">
+      <span class="material-symbols-outlined text-sm">description</span>
+      Generate Mock Exam Paper
+    </button>
+    <button id="take-quiz-btn"
+      class="mt-4 px-6 py-3 bg-secondary-container text-on-secondary-container font-black uppercase tracking-widest text-xs btn-brutalist border-2 border-black flex items-center gap-2"
+      onclick="startQuiz('{{ note.id }}')">
+      <span class="material-symbols-outlined text-sm">edit_note</span>
+      Take Quiz
+    </button>
+    {% if note.user_id == user.id %}
+    <button id="re-summarize-btn"
+      class="mt-4 px-6 py-3 border-2 border-primary text-primary font-bold uppercase tracking-widest text-xs btn-brutalist hover:bg-primary hover:text-white transition-colors flex items-center gap-2"
+      onclick="reSummarize('{{ note.id }}')">
+      <span class="material-symbols-outlined text-sm">auto_awesome</span>
+      Re-Summarize
+    </button>
+    {% endif %}
+    <a href="{{ url_for('library') }}"
+      class="px-6 py-3 border-2 border-outline text-neutral-600 font-bold uppercase tracking-widest text-xs btn-brutalist">
+      ← Back to Library
+    </a>
+  </div>
+
+</div>
+
+<script>
+  async function generatePaper(noteId) {
+    const btn = document.getElementById('gen-paper-btn');
+    const qCount = parseInt(document.getElementById('num-questions').value) || 20;
+
+    btn.textContent = 'Generating...';
+    btn.disabled = true;
+    try {
+      const data = await window.API.generatePaper(noteId, qCount);
+      if (data.success) {
+        window.location.href = '/generated-paper/' + data.paper_id;
+      } else {
+        alert('Paper generation failed: ' + (data.error || 'Unknown error'));
+        btn.innerHTML = '<span class="material-symbols-outlined text-sm">description</span> Generate Paper';
+        btn.disabled = false;
+      }
+    } catch (e) {
+      alert('Error: ' + e.message);
+      btn.innerHTML = '<span class="material-symbols-outlined text-sm">description</span> Generate Paper';
+      btn.disabled = false;
+    }
+  }
+
+  function startQuiz(noteId) {
+    const qCount = parseInt(document.getElementById('num-questions').value) || 20;
+    window.location.href = `/test-mode/${noteId}?qCount=${qCount}`;
+  }
+
+  async function reSummarize(noteId) {
+    const btn = document.getElementById('re-summarize-btn');
+    btn.textContent = 'Summarizing...';
+    btn.disabled = true;
+    try {
+      const data = await window.API.summarizeNote(noteId);
+      if (data.success) location.reload();
+      else {
+        alert('Summarization failed: ' + (data.error || 'Unknown error'));
+        btn.innerHTML = '<span class="material-symbols-outlined text-sm">auto_awesome</span> Re-Summarize';
+        btn.disabled = false;
+      }
+    } catch (e) {
+      alert('Error: ' + e.message);
+      btn.innerHTML = '<span class="material-symbols-outlined text-sm">auto_awesome</span> Re-Summarize';
+      btn.disabled = false;
+    }
+  }
+</script>
+{% endif %}
+{% endblock %}
