@@ -253,7 +253,17 @@ def debug_db():
     for n in notes:
         output += f"- ID: {n['id']}, Title: {n.get('title')}, Univ: {n.get('university')}, Created: {n.get('created_at')}\n"
         
+    
     return output, 200, {'Content-Type': 'text/plain'}
+
+@app.route('/ai-tools')
+@login_required
+def ai_tools():
+    my_notes_data = get_notes_for_user(str(current_user.id))
+    my_notes = [Note(n) for n in my_notes_data]
+    return render_template('ai-tools.html', my_notes=my_notes, user=current_user)
+
+
 if __name__ == '__main__':
     print("[NoteStack] Running on http://localhost:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)
