@@ -155,10 +155,10 @@ def _extract_keywords(corpus, target_text):
         print(f"Keyword extraction failed: {str(e)}")
         return []
     
-    def _score_sentences(corpus, target_text):
+def _score_sentences(corpus, target_text):
     """
-    Scores each sentence in target_text by TF-IDF importance.
-    Returns top N most important sentences.
+        Scores each sentence in target_text by TF-IDF importance.
+        Returns top N most important sentences.
     """
     # Split text into sentences
     sentences = [
