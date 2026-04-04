@@ -154,3 +154,90 @@ def _extract_keywords(corpus, target_text):
     except Exception as e:
         print(f"Keyword extraction failed: {str(e)}")
         return []
+    
+    def _score_sentences(corpus, target_text):
+    """
+    Scores each sentence in target_text by TF-IDF importance.
+    Returns top N most important sentences.
+    """
+    # Split text into sentences
+    sentences = [
+        s.strip()
+        for s in target_text.replace("\n", ". ").split(".")
+        if len(s.strip()) > 20     # ignore very short fragments
+    ]
+
+    if not sentences:
+        return []
+
+    try:
+        vectorizer = TfidfVectorizer(
+            stop_words="english",
+            max_features=1000,
+            min_df=1,
+        )
+
+        # Fit on full corpus for proper IDF
+        vectorizer.fit_transform(corpus)
+
+        # Transform only the sentences
+        sent_matrix = vectorizer.transform(sentences).toarray()
+
+        # Score each sentence = sum of all its word TF-IDF scores
+        scores = sent_matrix.sum(axis=1)
+
+        # Get top N sentence indices
+        top_indices = scores.argsort()[-TFIDF_MAX_SENTENCES:][::-1]
+
+        important = [sentences[i] for i in top_indices]
+        return important
+
+    except Exception as e:
+        print(f"Sentence scoring failed: {str(e)}")
+        return sentences[:TFIDF_MAX_SENTENCES]
+
+
+def get_topic_frequency(university, subject):
+    """
+    Analyzes all verified PYQs for a university and subject.
+    Returns topics ranked by how often they appear across papers.
+    Used by the AI tools page to show students what to prioritize.
+    """
+    try:
+        from firebase_admin import firestore
+        from collections import Counter
+        from google.cloud.firestore_v1.base_query import FieldFilter
+
+        db   = firestore.client()
+        docs = (
+            db.collection("pyq_papers")
+            .where(filter=FieldFilter("university", "==", university))
+            .where(filter=FieldFilter("subject", "==", subject))
+            .where(filter=FieldFilter("status", "==", "verified"))
+            .stream()
+        )
+
+        topic_counter = Counter()
+        total_papers  = 0
+
+        for doc in docs:
+            data = doc.to_dict()
+            total_papers += 1
+            for q in data.get("questions", []):
+                topic = q.get("topic", "")
+                if topic:
+                    topic_counter[topic] += 1
+
+        result = [
+            {
+                "topic":      topic,
+                "count":      count,
+                "percentage": round((count / total_papers) * 100)
+                              if total_papers > 0 else 0
+            }
+            for topic, count in topic_counter.most_common(15)
+        ]
+        return result
+
+    except Exception:
+        return []
