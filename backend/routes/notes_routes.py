@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from services.firebase_service import (
-    get_notes_for_user, get_note_by_id, rate_note as fb_rate, 
-    verify_pyq_paper, is_initialized, search_notes, delete_note
+    get_notes_for_user, get_note_by_id, 
+    is_initialized, search_notes, delete_note
 )
 
 notes_bp = Blueprint('notes', __name__, url_prefix='/api/notes')
