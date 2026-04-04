@@ -1,0 +1,291 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}AI Tools | NoteStack{% endblock %}
+{% block page_title %}AI Tools{% endblock %}
+
+{% block dashboard_content %}
+<div class="flex gap-0 -mx-12 -mb-12" style="min-height: calc(100vh - 120px);">
+
+  <!-- Left Panel: Note Selector & Controls -->
+  <section class="w-[420px] flex-shrink-0 overflow-y-auto bg-surface-container-lowest border-r-4 border-surface-container p-8 space-y-8">
+
+    <div>
+      <span class="bg-secondary-container text-on-secondary-container px-3 py-1 text-[10px] font-black uppercase tracking-widest border border-black">AI Engine</span>
+      <h2 class="text-3xl font-headline font-extrabold leading-tight tracking-tighter text-on-background mt-3">
+        Generate & Summarize
+      </h2>
+      <p class="text-sm text-neutral-500 mt-1">Select a note, then use your Study Buddy AI to summarize or generate a mock exam paper.</p>
+    </div>
+
+    <!-- Note selector -->
+    <div>
+      <label class="block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-2">Select Note</label>
+      {% if my_notes %}
+      <select id="note-select" class="w-full bg-transparent border-b-2 border-outline py-2 focus:border-primary focus:ring-0 font-bold uppercase text-sm">
+        <option value="">— Choose a note —</option>
+        {% for note in my_notes %}
+        <option value="{{ note.id }}"
+                data-subject="{{ note.subject }}"
+                data-university="{{ note.university or '' }}"
+                data-keywords="{{ note.keywords_list | join(', ') }}"
+                data-summary="{{ note.summary or '' }}">
+          {{ note.title }} · {{ note.subject }}
+        </option>
+        {% endfor %}
+      </select>
+      {% else %}
+      <div class="border-2 border-dashed border-outline-variant p-6 text-center">
+        <p class="text-sm text-neutral-500 mb-3">You haven't uploaded any notes yet.</p>
+        <a href="{{ url_for('upload_note') }}" class="inline-block bg-primary text-white px-4 py-2 text-xs font-black uppercase tracking-widest btn-brutalist">Upload First Note →</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Selected note preview -->
+    <div id="note-preview" class="hidden space-y-3 p-4 bg-surface-container border-l-4 border-secondary-container">
+      <p class="text-[10px] font-black uppercase tracking-widest text-neutral-500">Subject</p>
+      <p id="preview-subject" class="font-bold text-primary text-lg"></p>
+      <p class="text-[10px] font-black uppercase tracking-widest text-neutral-500 mt-2">Keywords</p>
+      <div id="preview-keywords" class="flex flex-wrap gap-1"></div>
+    </div>
+
+    <!-- Subject + University override (for paper without note) -->
+    <div class="space-y-4 pt-4 border-t-2 border-outline-variant">
+      <p class="text-[10px] font-black uppercase tracking-widest text-neutral-400">Or enter manually</p>
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1">Subject</label>
+        <input id="manual-subject" type="text"
+               class="w-full bg-transparent border-b-2 border-outline py-1.5 focus:border-primary outline-none font-bold text-sm transition-all"
+               placeholder="e.g. Signal Processing" />
+      </div>
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1">University</label>
+        <input id="manual-university" type="text"
+               class="w-full bg-transparent border-b-2 border-outline py-1.5 focus:border-primary outline-none font-bold text-sm transition-all"
+               value="{{ current_user.university or '' }}"
+               placeholder="e.g. VTU, Anna University, or NIT" />
+      </div>
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1">Keywords (comma-separated)</label>
+        <input id="manual-keywords" type="text"
+               class="w-full bg-transparent border-b-2 border-outline py-1.5 focus:border-primary outline-none font-bold text-sm transition-all"
+               placeholder="binary tree, sorting, hashing" />
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="space-y-3">
+      <button id="btn-summarize"
+              class="w-full flex items-center justify-between bg-primary-container text-on-primary-container px-6 py-5 border-primary hover:bg-primary btn-brutalist transition-colors group">
+        <div>
+          <span class="text-xl font-headline font-black uppercase italic block">Summarize</span>
+          <span class="text-xs opacity-70">Extract key concepts for revision</span>
+        </div>
+        <span class="material-symbols-outlined text-3xl">auto_awesome</span>
+      </button>
+
+      <button id="btn-generate"
+              class="w-full flex items-center justify-between bg-surface-container-highest text-on-surface px-6 py-5 border-neutral-900 hover:bg-neutral-900 hover:text-white btn-brutalist transition-colors group">
+        <div>
+          <span class="text-xl font-headline font-black uppercase italic block">Generate Mock Paper</span>
+          <span class="text-xs opacity-70">AI-generated college-style exam paper</span>
+        </div>
+        <span class="material-symbols-outlined text-3xl">description</span>
+      </button>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="ai-loading" class="hidden flex items-center gap-3 text-sm text-slate-500">
+      <span class="material-symbols-outlined text-primary" style="animation: spin 1s linear infinite">hourglass_empty</span>
+      <span id="ai-loading-msg">Processing with AI...</span>
+    </div>
+
+  </section>
+
+  <!-- Right Panel: Output -->
+  <section class="flex-1 overflow-y-auto p-10 bg-white">
+
+    <!-- Empty state -->
+    <div id="output-empty" class="h-full flex flex-col items-center justify-center text-center opacity-40 py-24">
+      <span class="material-symbols-outlined text-7xl text-primary mb-4" style="font-variation-settings:'wght' 200">auto_awesome</span>
+      <p class="text-xl font-headline font-black uppercase">Select a note and choose an action</p>
+      <p class="text-sm mt-2 text-neutral-500">Your AI output will appear here</p>
+    </div>
+
+    <!-- Summary output -->
+    <div id="output-summary" class="hidden space-y-6">
+      <div class="flex items-center justify-between border-b-4 border-primary pb-4">
+        <h3 class="text-3xl font-headline font-black italic tracking-tighter uppercase text-primary">AI Summary</h3>
+        <button id="copy-summary-btn"
+                class="text-xs font-bold uppercase tracking-widest border-outline-variant text-neutral-600 px-4 py-2 btn-brutalist hover:bg-primary hover:text-white transition-colors"
+                onclick="copyText('summary-content')">Copy</button>
+      </div>
+      <div class="prose prose-neutral max-w-none">
+        <p id="summary-content" class="font-body text-base leading-relaxed whitespace-pre-line text-neutral-800"></p>
+      </div>
+      <div class="flex gap-4 pt-4">
+        <button id="gen-from-summary-btn"
+                class="px-6 py-3 bg-neutral-900 text-white font-bold uppercase tracking-widest text-xs btn-brutalist flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm">description</span>
+          Generate Mock Paper from This
+        </button>
+      </div>
+    </div>
+
+    <!-- Paper generation loading -->
+    <div id="output-generating" class="hidden flex flex-col items-center justify-center py-24 space-y-4">
+      <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full" style="animation: spin 1s linear infinite"></div>
+      <p class="font-headline font-black text-xl uppercase text-primary">Generating Paper...</p>
+      <p class="text-sm text-neutral-500">AI is crafting college-style questions</p>
+    </div>
+
+  </section>
+</div>
+
+<style>
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+(function() {
+  const noteSelect   = document.getElementById('note-select');
+  const notePreview  = document.getElementById('note-preview');
+  const btnSummarize = document.getElementById('btn-summarize');
+  const btnGenerate  = document.getElementById('btn-generate');
+  const aiLoading    = document.getElementById('ai-loading');
+  const aiLoadingMsg = document.getElementById('ai-loading-msg');
+
+  function getInputs() {
+    const selected = noteSelect?.options[noteSelect?.selectedIndex];
+    const noteId   = noteSelect?.value || null;
+
+    let subject    = document.getElementById('manual-subject').value.trim();
+    let university = document.getElementById('manual-university').value.trim();
+    let keywords   = document.getElementById('manual-keywords').value.trim()
+                             .split(',').map(k => k.trim()).filter(Boolean);
+
+    if (selected && noteId) {
+      subject    = selected.dataset.subject    || subject;
+      university = selected.dataset.university || university;
+      keywords   = (selected.dataset.keywords || '').split(',').map(k=>k.trim()).filter(Boolean);
+    }
+    return { noteId, subject, university, keywords };
+  }
+
+  // Note selection preview
+  noteSelect?.addEventListener('change', function() {
+    const selected = this.options[this.selectedIndex];
+    if (this.value && selected) {
+      notePreview.classList.remove('hidden');
+      document.getElementById('preview-subject').textContent = selected.dataset.subject || '';
+      const kwDiv = document.getElementById('preview-keywords');
+      kwDiv.innerHTML = '';
+      (selected.dataset.keywords || '').split(',').filter(k=>k.trim()).forEach(kw => {
+        const span = document.createElement('span');
+        span.className = 'bg-secondary-container text-on-secondary-container px-2 py-0.5 text-[9px] font-bold uppercase border border-black';
+        span.textContent = kw.trim();
+        kwDiv.appendChild(span);
+      });
+      // Pre-fill manual fields
+      document.getElementById('manual-subject').value    = selected.dataset.subject    || '';
+      document.getElementById('manual-university').value = selected.dataset.university || '';
+      document.getElementById('manual-keywords').value   = selected.dataset.keywords   || '';
+    } else {
+      notePreview.classList.add('hidden');
+    }
+  });
+
+  function showLoading(msg) {
+    aiLoading.classList.remove('hidden');
+    aiLoadingMsg.textContent = msg || 'Processing with AI...';
+    btnSummarize.disabled = true;
+    btnGenerate.disabled  = true;
+  }
+
+  function hideLoading() {
+    aiLoading.classList.add('hidden');
+    btnSummarize.disabled = false;
+    btnGenerate.disabled  = false;
+  }
+
+  function showEmpty() {
+    document.getElementById('output-empty').classList.remove('hidden');
+    document.getElementById('output-summary').classList.add('hidden');
+    document.getElementById('output-generating').classList.add('hidden');
+  }
+
+  // Summarize
+  btnSummarize?.addEventListener('click', async function() {
+    const { noteId, subject, university } = getInputs();
+    if (!noteId && !subject) { alert('Select a note or enter a subject.'); return; }
+
+    showLoading('Summarizing with Gemini AI...');
+    document.getElementById('output-empty').classList.add('hidden');
+    document.getElementById('output-summary').classList.add('hidden');
+    document.getElementById('output-generating').classList.add('hidden');
+
+    try {
+      const data = await window.API.summarizeNote(noteId);
+      hideLoading();
+
+      if (data.success) {
+        document.getElementById('summary-content').textContent = data.summary;
+        document.getElementById('output-summary').classList.remove('hidden');
+
+        document.getElementById('gen-from-summary-btn').onclick = function() {
+          btnGenerate.click();
+        };
+      } else {
+        alert('Summarization failed: ' + (data.error || 'Unknown error'));
+        showEmpty();
+      }
+    } catch(err) {
+      hideLoading();
+      alert('Error: ' + err.message);
+      showEmpty();
+    }
+  });
+
+  // Generate Paper
+  btnGenerate?.addEventListener('click', async function() {
+    const { noteId, subject, university, keywords } = getInputs();
+    if (!subject && !noteId) { alert('Select a note or enter a subject.'); return; }
+
+    showLoading('Generating exam paper with AI...');
+    document.getElementById('output-empty').classList.add('hidden');
+    document.getElementById('output-summary').classList.add('hidden');
+    document.getElementById('output-generating').classList.remove('hidden');
+
+    try {
+      const data = await window.API.generatePaper(noteId, 20, subject, university, keywords);
+      hideLoading();
+
+      if (data.success) {
+        window.location.href = '/generated-paper/' + data.paper_id;
+      } else {
+        alert('Paper generation failed.');
+        document.getElementById('output-generating').classList.add('hidden');
+        showEmpty();
+      }
+    } catch(err) {
+      hideLoading();
+      alert('Error: ' + err.message);
+      document.getElementById('output-generating').classList.add('hidden');
+      showEmpty();
+    }
+  });
+
+  window.copyText = function(id) {
+    const el = document.getElementById(id);
+    navigator.clipboard.writeText(el?.textContent || '').then(() => {
+      const btn = document.getElementById('copy-summary-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  };
+
+})();
+</script>
+{% endblock %}
