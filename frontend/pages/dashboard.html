@@ -28,7 +28,7 @@
 
   <div class="relative z-10">
     <h2 class="text-5xl font-black text-on-surface tracking-tight leading-none italic">
-      Good {{ 'morning' if now_hour < 12 else ('afternoon' if now_hour < 17 else 'evening' ) }}, {{
+      Good {{ 'Morning' if now_hour < 12 else ('Afternoon' if now_hour < 17 else 'Evening' ) }}, {{
         current_user.full_name.split()[0] if current_user.full_name else 'Scholar' }} </h2>
         <p class="mt-3 text-slate-500 font-body text-base max-w-2xl">
           Your exam-prep arsenal is ready. Let's crack those <span class="text-primary font-bold">internals and
