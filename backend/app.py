@@ -166,6 +166,94 @@ def dashboard():
                            paper_count=paper_count,
                            recent_notes=recent_notes)
 
+@app.route('/library')
+@login_required
+def library():
+    subject_filter = request.args.get('subject', '').strip()
+    search_query   = request.args.get('q', '').strip()
+
+    notes_data = search_notes(
+        university=current_user.university or '',
+        subject_filter=subject_filter,
+        search_query=search_query,
+        limit=30
+    )
+    all_notes = [Note(n) for n in notes_data]
+    
+    my_notes_data = get_notes_for_user(
+        uid=str(current_user.id),
+        subject=subject_filter,
+        search_query=search_query
+    )
+    my_notes = [Note(n) for n in my_notes_data]
+    
+    subjects = get_all_subjects()
+    
+    return render_template('library.html',
+                           notes=all_notes,
+                           my_notes=my_notes,
+                           subjects=subjects,
+                           subject_filter=subject_filter,
+                           search_query=search_query)
+
+
+@app.route('/upload-note')
+@login_required
+def upload_note():
+    return render_template('upload-note.html', user=current_user)
+
+
+@app.route('/upload-pyq')
+@login_required
+def upload_pyq():
+    return render_template('upload-pyq.html', user=current_user)
+
+
+@app.route('/note-detail/<string:note_id>')
+@app.route('/note-detail')
+@login_required
+def note_detail(note_id=None):
+    note = None
+    if note_id:
+        n_data = get_note_by_id(note_id)
+        if n_data:
+            note = Note(n_data)
+    return render_template('note-detail.html', note=note, user=current_user)
+
+
+@app.route('/debug-db')
+@login_required
+def debug_db():
+    from services.firebase_service import get_firestore, _convert_timestamp
+    import json
+    
+    db = get_firestore()
+    if not db:
+        return "Firebase not initialized", 500
+        
+    uid = str(current_user.id)
+    notes_ref = db.collection("notes").where("uid", "==", uid).limit(50).stream()
+    
+    notes = []
+    for doc in notes_ref:
+        d = doc.to_dict()
+        d['id'] = doc.id
+        notes.append(_convert_timestamp(d))
+        
+    user_data = {
+        "id": current_user.id,
+        "full_name": current_user.full_name,
+        "email": current_user.email,
+        "university": getattr(current_user, 'university', 'NONE'),
+        "notes_found": len(notes)
+    }
+    
+    # Return  plain text for easy read
+    output = f"USER DATA:\n{json.dumps(user_data, indent=2)}\n\nNOTES FOUND:\n"
+    for n in notes:
+        output += f"- ID: {n['id']}, Title: {n.get('title')}, Univ: {n.get('university')}, Created: {n.get('created_at')}\n"
+        
+    return output, 200, {'Content-Type': 'text/plain'}
 if __name__ == '__main__':
     print("[NoteStack] Running on http://localhost:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)
