@@ -82,12 +82,58 @@ class Note:
         except:
             return []
 
-##generated paper
+class GeneratedPaper:
+    def __init__(self, data):
+        self.id              = data.get('id')
+        self.user_id         = data.get('uid') or data.get('user_id')
+        self.note_id         = data.get('note_id')
+        self.subject         = data.get('subject')
+        self.university      = data.get('university')
+        self.mode            = data.get('mode')
+        self.questions       = data.get('questions', [])
+        self.sections        = data.get('sections', {})
+        self.stats           = data.get('stats', {})          # relevance stats
+        self.priority_topics = data.get('priority_topics', [])
+        self.created_at      = data.get('created_at')
+
+    @property
+    def sections_dict(self):
+        if isinstance(self.sections, dict):
+            return self.sections
+        try:
+            return json.loads(self.sections or '{}')
+        except:
+            return {}
+
+    @property
+    def questions_list(self):
+        if isinstance(self.questions, list):
+            return self.questions
+        try:
+            return json.loads(self.questions or '[]')
+        except:
+            return []
 
 
 
-##test result
+class TestResult:
+    def __init__(self, data):
+        self.id               = data.get('id')
+        self.user_id          = data.get('uid') or data.get('user_id')
+        self.subject          = data.get('subject')
+        self.score            = data.get('score', 0)
+        self.correct_answers  = data.get('correct') or data.get('correct_answers', 0)
+        self.total_questions  = data.get('total') or data.get('total_questions', 0)
+        self.time_taken       = data.get('time_taken', 0)
+        self.created_at       = data.get('created_at')
 
 
-
-##faq maybe?
+class FAQ:
+    def __init__(self, data):
+        self.id         = data.get('id')
+        self.user_id    = data.get('uid') or data.get('user_id')
+        self.note_id    = data.get('note_id')
+        self.subject    = data.get('subject')
+        self.question   = data.get('question')
+        self.answer     = data.get('answer')
+        self.created_at = data.get('created_at')
