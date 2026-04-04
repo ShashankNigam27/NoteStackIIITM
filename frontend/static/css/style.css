@@ -1,0 +1,161 @@
+/* Core Typography Forms */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+}
+body {
+    font-family: 'Inter', sans-serif;
+}
+h1, h2, h3, h4, h5, h6, .font-headline {
+    font-family: 'Newsreader', serif;
+}
+
+/* Geometric Layout */
+.hero-grid {
+    background-color: #ffffff;
+    background-image: 
+        linear-gradient(#E0FFFF 1px, transparent 1px),
+        linear-gradient(90deg, #E0FFFF 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+.flight-path {
+    stroke-dasharray: 8 8;
+    fill: none;
+    stroke: #000;
+    stroke-width: 2;
+    opacity: 0.4;
+}
+
+/* Structural Components */
+.brutalist-shadow {
+    box-shadow: 8px 8px 0px rgba(0,0,0,1);
+}
+.hard-shadow {
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+}
+
+/* Pop-up (Toast) Component Styles */
+.brutalist-toast {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    z-index: 100;
+    background: #fed01b; /* Mustard Yellow */
+    border: 3px solid #000;
+    padding: 1rem 2rem;
+    color: #000;
+    transform: translate(0, 0);
+    box-shadow: 8px 8px 0px rgba(0,0,0,1);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.05em;
+    animation: toast-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes toast-in {
+    from {
+        transform: translate(20px, -20px);
+        opacity: 0;
+    }
+    to {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+}
+
+/* 
+  Standard 4px Button Shadow (The default for NoteStack UI)
+*/
+.btn-brutalist {
+    border: 2px solid #000;
+    box-shadow: 4px 4px 0px rgba(0,0,0,1);
+    transition: all 0.1s ease-in-out;
+    transform: translate(0, 0);
+}
+
+.btn-brutalist:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 0px 0px 0px rgba(0,0,0,0);
+}
+
+/* 
+  Enlarged 8px Button Shadow (Special for CTA buttons like 'Join the University')
+*/
+.btn-brutalist-lg {
+    border: 3px solid #000;
+    box-shadow: 8px 8px 0px rgba(0,0,0,1);
+    transition: all 0.1s ease-in-out;
+    transform: translate(0, 0);
+}
+
+.btn-brutalist-lg:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 0px 0px 0px rgba(0,0,0,0);
+}
+
+/* Standardized Post-Login Architecture Elements */
+.active-nav-border {
+    border-left: 4px solid #b70011;
+}
+
+/* Global Form & Input Enhancements */
+.input-academic:focus, input:focus, select:focus {
+    outline: none !important;
+    border-bottom-width: 4px !important;
+    border-color: #b70011 !important;
+}
+
+/* Custom checkbox appearance */
+input[type="checkbox"] {
+    border-radius: 0px;
+    border: 2px solid #916f6b;
+    color: #b70011;
+}
+input[type="checkbox"]:checked {
+    background-color: #fed01b;
+    border-color: #735c00;
+}
+
+/* Hero Plane Animations */
+#plane-container.active .plane-tl {
+    opacity: 1;
+    transform: translate(60px, 60px) rotate(15deg);
+    animation: gentle-float-1 4s ease-in-out infinite alternate;
+    animation-delay: 0.1s;
+}
+#plane-container.active .plane-tr {
+    opacity: 1;
+    transform: translate(-70px, 80px) rotate(-30deg);
+    animation: gentle-float-2 3.5s ease-in-out infinite alternate;
+    animation-delay: 0.2s;
+}
+#plane-container.active .plane-bl {
+    opacity: 1;
+    transform: translate(80px, -60px) rotate(-15deg);
+    animation: gentle-float-3 4.2s ease-in-out infinite alternate;
+    animation-delay: 0s;
+}
+#plane-container.active .plane-br {
+    opacity: 1;
+    transform: translate(-60px, -70px) rotate(25deg);
+    animation: gentle-float-4 3.8s ease-in-out infinite alternate;
+    animation-delay: 0.3s;
+}
+
+@keyframes gentle-float-1 {
+    0% { transform: translate(60px, 60px) rotate(15deg); }
+    100% { transform: translate(75px, 45px) rotate(18deg); }
+}
+@keyframes gentle-float-2 {
+    0% { transform: translate(-70px, 80px) rotate(-30deg); }
+    100% { transform: translate(-55px, 65px) rotate(-27deg); }
+}
+@keyframes gentle-float-3 {
+    0% { transform: translate(80px, -60px) rotate(-15deg); }
+    100% { transform: translate(65px, -45px) rotate(-17deg); }
+}
+@keyframes gentle-float-4 {
+    0% { transform: translate(-60px, -70px) rotate(25deg); }
+    100% { transform: translate(-45px, -85px) rotate(22deg); }
+}
