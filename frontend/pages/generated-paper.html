@@ -1,0 +1,242 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}Generated Paper | NoteStack{% endblock %}
+{% block page_title %}Generated Paper{% endblock %}
+
+{% block dashboard_content %}
+
+{% if not paper %}
+<!-- No paper yet — prompt user -->
+<div class="max-w-2xl mx-auto py-24 text-center space-y-6">
+  <span class="material-symbols-outlined text-7xl text-primary opacity-30" style="font-variation-settings:'wght' 200">description</span>
+  <h2 class="text-4xl font-headline font-black text-on-surface">No Paper Generated Yet</h2>
+  <p class="text-neutral-500">Go to AI Tools to generate your first college mock exam paper.</p>
+  <a href="{{ url_for('ai_tools') }}"
+     class="inline-block bg-primary text-white px-8 py-4 font-black uppercase tracking-widest text-sm btn-brutalist">
+    Open AI Tools →
+  </a>
+</div>
+
+{% else %}
+
+<div class="flex gap-8 -mx-6 -mb-12" style="min-height: calc(100vh - 120px);">
+
+  <!-- Paper Document -->
+  <div class="flex-1 overflow-y-auto px-8 pb-12">
+    <article id="paper-content" class="max-w-[760px] mx-auto bg-white shadow-[12px_12px_0px_rgba(0,0,0,0.3)] min-h-[900px] p-12 relative border border-neutral-200">
+
+      <!-- Header -->
+      <div class="border-b-4 border-black pb-6 mb-10 flex justify-between items-start">
+        <div>
+          <h2 class="font-headline text-3xl font-black text-black uppercase mb-1">
+            {{ paper.university or 'NoteStack Prep College' }}
+          </h2>
+          <p class="font-body font-bold text-neutral-600 tracking-widest uppercase text-sm">
+            {{ paper.subject }}
+          </p>
+        </div>
+        <div class="text-right">
+          <p class="font-body font-black text-2xl text-red-700">{{ paper.created_at.strftime('%Y') }}</p>
+          <p class="font-body text-xs font-bold uppercase tracking-tighter text-neutral-500">
+            Paper ID: NS-{{ paper.id }}
+          </p>
+          <span class="inline-block mt-1 text-[9px] font-black uppercase px-2 py-0.5
+            {% if paper.mode == 'university_model' %}bg-green-100 text-green-800
+            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+            {{ 'College Model' if paper.mode == 'university_model' else 'AI Generated' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="bg-neutral-50 p-5 border-l-8 border-yellow-400 mb-10">
+        <h3 class="font-body font-black uppercase text-xs tracking-widest mb-2 text-neutral-500">Candidate Instructions</h3>
+        <p class="font-body text-sm text-neutral-800 leading-relaxed italic">
+          Answer ALL questions in Section A. Choose any THREE from Section B and ONE from Section C.
+          Time allowed: 3 hours. Max Marks: 100.
+        </p>
+      </div>
+
+      {% set sections_data = paper.sections_dict %}
+
+
+      <!-- Section A -->
+      {% if sections_data.A %}
+      <section class="mb-10">
+        <div class="flex justify-between items-end border-b-2 border-black mb-5">
+          <h4 class="font-headline text-2xl pb-1">SECTION A — Short Answer</h4>
+          <span class="bg-green-100 text-green-800 px-3 py-1 font-body text-[10px] font-black uppercase mb-1 tracking-widest">2 Marks Each</span>
+        </div>
+        <div class="space-y-6">
+          {% for q in sections_data.A %}
+          <div class="relative pl-8">
+            <span class="absolute left-0 top-0 font-body font-black text-red-700">{{ loop.index }}.</span>
+            <p class="font-body text-base leading-snug mb-2">{{ q.text }}</p>
+            {% if q.difficulty %}
+            <span class="inline-flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-sm
+              {% if q.difficulty == 'Easy' %}text-green-700 bg-green-50 border border-green-200
+              {% elif q.difficulty == 'Hard' %}text-red-700 bg-red-50 border border-red-200
+              {% else %}text-orange-700 bg-orange-50 border border-orange-200{% endif %}">
+              <span class="inline-block w-1.5 h-1.5 rounded-full
+                {% if q.difficulty == 'Easy' %}bg-green-500
+                {% elif q.difficulty == 'Hard' %}bg-red-500
+                {% else %}bg-orange-400{% endif %}"></span>
+              {{ q.difficulty }}
+            </span>
+            {% endif %}
+            <div class="h-px w-full bg-neutral-200 mt-4"></div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+      <!-- Section B -->
+      {% if sections_data.B %}
+      <section class="mb-10">
+        <div class="flex justify-between items-end border-b-2 border-black mb-5">
+          <h4 class="font-headline text-2xl pb-1">SECTION B — Medium Answer</h4>
+          <span class="bg-orange-100 text-orange-800 px-3 py-1 font-body text-[10px] font-black uppercase mb-1 tracking-widest">7 Marks Each</span>
+        </div>
+        <div class="space-y-8">
+          {% for q in sections_data.B %}
+          <div class="relative pl-8">
+            <span class="absolute left-0 top-0 font-body font-black text-red-700">{{ loop.index }}.</span>
+            <p class="font-body text-base leading-snug mb-2">{{ q.text }}</p>
+            {% if q.difficulty %}
+            <span class="text-[9px] font-black uppercase px-2 py-0.5
+              {% if q.difficulty == 'Easy' %}text-green-700 bg-green-50
+              {% elif q.difficulty == 'Hard' %}text-red-700 bg-red-50
+              {% else %}text-orange-700 bg-orange-50{% endif %}">
+              {{ q.difficulty }}
+            </span>
+            {% endif %}
+            <div class="grid grid-cols-1 gap-2 mt-4 opacity-10">
+              <div class="h-px w-full bg-black"></div>
+              <div class="h-px w-full bg-black"></div>
+              <div class="h-px w-full bg-black"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+      <!-- Section C -->
+      {% if sections_data.C %}
+      <section class="mb-10">
+        <div class="flex justify-between items-end border-b-2 border-black mb-5">
+          <h4 class="font-headline text-2xl pb-1 text-red-700">SECTION C — Long Answer</h4>
+          <span class="bg-red-100 text-red-800 px-3 py-1 font-body text-[10px] font-black uppercase mb-1 tracking-widest">14 Marks Each</span>
+        </div>
+        <div class="space-y-10">
+          {% for q in sections_data.C %}
+          <div class="relative pl-8">
+            <span class="absolute left-0 font-body font-black text-red-700 italic text-lg">{{ loop.index }}.</span>
+            <p class="font-body text-lg font-bold leading-tight mb-2">{{ q.text }}</p>
+            {% if q.difficulty %}
+            <span class="text-[9px] font-black uppercase px-2 py-0.5 text-red-700 bg-red-50">{{ q.difficulty }}</span>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+      <!-- Paper Footer -->
+      <div class="mt-16 pt-6 border-t border-neutral-200 flex justify-between items-center opacity-50">
+        <span class="font-body text-[10px] font-black uppercase tracking-widest">Generated by NoteStack Study Buddy</span>
+        <span class="font-body text-[10px] font-black uppercase tracking-widest">
+          {{ paper.created_at.strftime('%d %b %Y') }}
+        </span>
+      </div>
+
+      <!-- Watermark -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45 pointer-events-none opacity-[0.025] select-none">
+        <p class="text-[100px] font-black whitespace-nowrap">NOTESTACK</p>
+      </div>
+
+    </article>
+  </div>
+
+  <!-- Sidebar Controls -->
+  <div class="w-60 flex-shrink-0 sticky top-4 space-y-4 pr-4 py-4">
+
+    <div class="bg-neutral-800 p-5 border border-neutral-700">
+      <h5 class="font-body font-black text-white uppercase text-xs tracking-widest mb-4 border-b border-neutral-700 pb-2">Controls</h5>
+
+      <button onclick="printPaper()"
+              class="w-full bg-primary-container text-on-primary-container font-black uppercase tracking-widest text-xs py-3 flex items-center justify-center gap-2 border-primary hover:bg-red-800 hover:text-white transition-colors mb-3 btn-brutalist">
+        <span class="material-symbols-outlined text-sm">print</span>
+        Print / Save PDF
+      </button>
+
+      <a href="{{ url_for('test_mode') }}?paper_id={{ paper.id }}"
+         class="block w-full bg-transparent text-secondary-container font-black uppercase tracking-widest text-xs py-3 flex items-center justify-center gap-2 border-secondary-container hover:bg-yellow-400 hover:text-black transition-colors btn-brutalist">
+        <span class="material-symbols-outlined text-sm">play_arrow</span>
+        Take Test
+      </a>
+
+      <div class="mt-5 pt-4 border-t border-neutral-700 space-y-3 text-xs">
+        <div class="flex justify-between">
+          <span class="text-neutral-400 font-bold uppercase">Subject</span>
+          <span class="text-white font-black text-right">{{ paper.subject[:20] }}{% if paper.subject|length > 20 %}…{% endif %}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-neutral-400 font-bold uppercase">Sec A Qs</span>
+          <span class="text-white font-black">{{ sections_data.A|length if sections_data.A else 0 }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-neutral-400 font-bold uppercase">Sec B Qs</span>
+          <span class="text-white font-black">{{ sections_data.B|length if sections_data.B else 0 }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-neutral-400 font-bold uppercase">Sec C Qs</span>
+          <span class="text-white font-black">{{ sections_data.C|length if sections_data.C else 0 }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-neutral-400 font-bold uppercase">Mode</span>
+          <span class="font-black {% if paper.mode == 'university_model' %}text-green-400{% else %}text-yellow-400{% endif %}">
+            {{ 'UNI' if paper.mode == 'university_model' else 'GEMINI' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <a href="{{ url_for('ai_tools') }}"
+       class="block text-center w-full border-2 border-outline text-neutral-600 font-bold uppercase tracking-widest text-xs py-3 btn-brutalist hover:bg-primary hover:text-white hover:border-primary transition-colors">
+      ← Generate Another
+    </a>
+
+    <div class="bg-primary p-5 border-2 border-black">
+      <p class="font-headline text-white text-base leading-tight mb-1 italic">"Smart Prep. Better Scores. Your Study Buddy."</p>
+      <p class="font-body text-[9px] text-red-200 font-black uppercase tracking-widest">— NoteStack Motto</p>
+    </div>
+
+  </div>
+
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+function printPaper() {
+  const content = document.getElementById('paper-content');
+  if (!content) return;
+  const win = window.open('', '_blank');
+  win.document.write(`
+    <html><head><title>NoteStack Paper</title>
+    <style>
+      body { font-family: Georgia, serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+      h2, h3, h4 { font-family: Georgia, serif; }
+      .no-print { display: none; }
+    </style></head>
+    <body>${content.innerHTML}</body></html>
+  `);
+  win.document.close();
+  win.print();
+}
+</script>
+{% endblock %}
