@@ -1,10 +1,10 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyDs8p2UQYyOOKUaSYaBjsqu25J5z-nxcmM",
-  authDomain: "test1-d4169.firebaseapp.com",
-  projectId: "test1-d4169",
-  storageBucket: "test1-d4169.firebasestorage.app",
-  messagingSenderId: "434086099438",
-  appId: "1:434086099438:web:a554d5ecc3bf59a13fb6ff"
+  apiKey: "AIzaSyAZEvPB1MaBbnT09e5EibwUsXvb-M725YM",
+  authDomain: "notestackiitm.firebaseapp.com",
+  projectId: "notestackiitm",
+  storageBucket: "notestackiitm.firebasestorage.app",
+  messagingSenderId: "493958401204",
+  appId: "1:493958401204:web:3e01028a538146e06b1be1"
 };
 
 // Initialize Firebase (only if firebase JS script is included in the HTML)
