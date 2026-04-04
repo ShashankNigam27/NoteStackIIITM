@@ -42,8 +42,8 @@ def init_firebase():
     if _initialized:
         return
 
-    # User mentioned firebase-auth.json is the correct key
-    key_path = os.path.join(os.path.dirname(__file__), '..', 'firebase-auth.json')
+    # User mentioned serviceAccountKey.json is the correct key
+    key_path = os.path.join(os.path.dirname(__file__), '..', 'serviceAccountKey.json')
 
     if not os.path.exists(key_path):
         print(f"[Firebase] {key_path} not found. Firebase features disabled.")
