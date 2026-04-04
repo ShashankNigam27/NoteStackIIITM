@@ -137,3 +137,4 @@ class FAQ:
         self.question   = data.get('question')
         self.answer     = data.get('answer')
         self.created_at = data.get('created_at')
+        

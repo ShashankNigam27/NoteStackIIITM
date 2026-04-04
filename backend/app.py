@@ -14,7 +14,7 @@ from services.firebase_service import (
 
 #extensions and models
 from extensions import login_manager
-from models     import User, Note ##more
+from models     import User, Note,GeneratedPaper,TestResult,FAQ
 from services.firebase_service import (
     init_firebase, get_user_by_id, get_note_count, get_paper_count, 
     get_notes_for_user, search_notes, get_all_subjects, get_generated_paper,
@@ -263,6 +263,128 @@ def ai_tools():
     my_notes = [Note(n) for n in my_notes_data]
     return render_template('ai-tools.html', my_notes=my_notes, user=current_user)
 
+
+@app.route('/generated-paper')
+@app.route('/generated-paper/<string:paper_id>')
+@login_required
+def generated_paper(paper_id=None):
+    paper = None
+    if paper_id:
+        p_data = get_generated_paper(paper_id)
+        if p_data and p_data.get('uid') == str(current_user.id):
+            paper = GeneratedPaper(p_data)
+    elif request.args.get('paper_id'):
+        p_data = get_generated_paper(request.args.get('paper_id'))
+        if p_data and p_data.get('uid') == str(current_user.id):
+            paper = GeneratedPaper(p_data)
+    else:
+        # Get latest
+        p_list = get_test_history(str(current_user.id), limit=1) # Using test history as proxy or add get_latest_paper
+        if p_list:
+            paper = GeneratedPaper(p_list[0]) # 
+            
+    return render_template('generated-paper.html', paper=paper, user=current_user)
+
+
+
+
+@app.route('/analytics')
+@login_required
+def analytics():
+    uid = str(current_user.id)
+    note_count  = get_note_count(uid)
+    paper_count = get_paper_count(uid)
+    
+    # Get all notes to count per subject
+    all_notes_data = get_notes_for_user(uid)
+    notes_per_subject = {}
+    for n in all_notes_data:
+        subj = n.get('subject', 'Untitled')
+        notes_per_subject[subj] = notes_per_subject.get(subj, 0) + 1
+        
+    results_data = get_test_history(uid, limit=100)
+    results = [TestResult(r) for r in results_data]
+    
+    total_tests = len(results)
+    avg_score   = round(sum(r.score for r in results) / total_tests, 1) if total_tests > 0 else 0
+    best_score  = round(max((r.score for r in results), default=0), 1)
+    
+    #Avg time taken (mins)
+    avg_time = round(sum(r.time_taken for r in results) / (total_tests * 60), 1) if total_tests > 0 else 0
+    
+    # Subject Mastery Matrix
+    subject_scores = {}
+    for r in results:
+        if r.subject not in subject_scores:
+            subject_scores[r.subject] = []
+        subject_scores[r.subject].append(r.score)
+        
+    subject_mastery = []
+    # Combine subjects from notes and tests
+    all_subjects = set(list(notes_per_subject.keys()) + list(subject_scores.keys()))
+    
+    for subj in all_subjects:
+        n_count = notes_per_subject.get(subj, 0)
+        scores = subject_scores.get(subj, [])
+        s_avg = round(sum(scores) / len(scores), 1) if scores else 0
+        t_count = len(scores)
+        
+        # Readiness Level: Based on notes (30%) and scores (70%)
+        # 3 notes = 100% note score (weight 30), Score 100 = weight 70
+        readiness = min(100, (min(n_count, 3) / 3 * 30) + (s_avg / 100 * 70)) if n_count > 0 or t_count > 0 else 0
+        
+        # Status labels
+        status = "CRITICAL" if (t_count > 0 and s_avg < 40) else ("MASTERED" if s_avg > 85 else "IN PROGRESS")
+
+        subject_mastery.append({
+            'subject': subj,
+            'note_count': n_count,
+            'test_count': t_count,
+            'avg_score': s_avg,
+            'readiness': round(readiness, 1),
+            'status': status
+        })
+    
+    # Sort by readiness
+    subject_mastery.sort(key=lambda x: x['readiness'])
+    
+    #Topics with scores below 60
+    weak_topics = [s for s in subject_mastery if s['avg_score'] < 60 and s['test_count'] > 0]
+    
+    # Recent Scores for Chart
+    recent_scores = [r.score for r in results[:10]]
+    recent_scores.reverse() # Show chronological order
+    if len(recent_scores) < 10:
+        recent_scores = [0] * (10 - len(recent_scores)) + recent_scores
+
+    return render_template('analytics.html', 
+                           user=current_user,
+                           note_count=note_count, 
+                           paper_count=paper_count,
+                           total_tests=total_tests,
+                           avg_score=avg_score,
+                           best_score=best_score,
+                           avg_time=avg_time,
+                           subject_mastery=subject_mastery,
+                           weak_topics=weak_topics,
+                           recent_scores=recent_scores)
+
+
+@app.route('/test-mode/<string:note_id>')
+@app.route('/test-mode')
+@login_required
+def test_mode(note_id=None):
+    if not note_id:
+        # If no note specified, redirect to library to pick one
+        flash('Please select a note to start a test.')
+        return redirect(url_for('library'))
+    
+    note_data = get_note_by_id(str(note_id))
+    if not note_data:
+        flash('Note not found.')
+        return redirect(url_for('library'))
+        
+    return render_template('test-mode.html', note_id=note_id, subject=note_data.get('subject'), user=current_user)
 
 if __name__ == '__main__':
     print("[NoteStack] Running on http://localhost:5000")
