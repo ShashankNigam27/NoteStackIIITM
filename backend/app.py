@@ -14,7 +14,7 @@ from services.firebase_service import (
 
 #extensions and models
 from extensions import login_manager
-from models     import User, Note, GeneratedPaper, TestResult, FAQ
+from models     import User, Note ##more
 from services.firebase_service import (
     init_firebase, get_user_by_id, get_note_count, get_paper_count, 
     get_notes_for_user, search_notes, get_all_subjects, get_generated_paper,
