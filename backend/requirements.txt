@@ -16,3 +16,5 @@ spacy
 nltk 
 rouge-score
 flask-login
+dotenv
+extensions
