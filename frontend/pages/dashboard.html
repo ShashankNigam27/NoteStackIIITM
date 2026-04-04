@@ -1,0 +1,167 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}NoteStack | Dashboard{% endblock %}
+{% block page_title %}Your Prep Pulse{% endblock %}
+
+{% block dashboard_content %}
+<!-- Welcome Header -->
+<section class="relative flex flex-col md:flex-row md:items-end justify-between gap-6 overflow-visible mb-12">
+  <!-- Paper Plane Decorations -->
+  <div class="absolute inset-0 pointer-events-none -z-10 overflow-visible hidden lg:block">
+    <!-- Top Left: Red Plane -->
+    <div class="absolute -top-16 -left-32 w-[600px] h-64">
+      <svg class="absolute inset-0 w-full h-full overflow-visible" viewBox="0 0 400 200">
+        <path class="flight-path" d="M -50 0 Q 150 100 380 140"></path>
+      </svg>
+      <img src="{{ url_for('static', filename='hero/Red plane.png') }}" alt="Red paper plane"
+        class="w-24 h-24 absolute top-[120px] left-[360px] plane-float drop-shadow-2xl" style="--base-rotate: 15deg;" />
+    </div>
+    <!-- Top Right: Blue Plane -->
+    <div class="absolute -top-8 -right-32 w-[600px] h-64">
+      <svg class="absolute inset-0 w-full h-full overflow-visible" viewBox="0 0 400 200">
+        <path class="flight-path" d="M 450 20 Q 250 80 20 140"></path>
+      </svg>
+      <img src="{{ url_for('static', filename='hero/Blue plane.png') }}" alt="Blue paper plane"
+        class="w-24 h-24 absolute top-[120px] left-0 plane-float drop-shadow-2xl"
+        style="--base-rotate: 15deg; --mirror: -1;" />
+    </div>
+  </div>
+
+  <div class="relative z-10">
+    <h2 class="text-5xl font-black text-on-surface tracking-tight leading-none italic">
+      Good {{ 'morning' if now_hour < 12 else ('afternoon' if now_hour < 17 else 'evening' ) }}, {{
+        current_user.full_name.split()[0] if current_user.full_name else 'Scholar' }} </h2>
+        <p class="mt-3 text-slate-500 font-body text-base max-w-2xl">
+          Your exam-prep arsenal is ready. Let's crack those <span class="text-primary font-bold">internals and
+            semesters</span> with NoteStack!
+        </p>
+  </div>
+  <div class="bg-secondary-container px-5 py-3 border-2 border-secondary inline-block flex-shrink-0">
+    <span class="font-bold text-xs uppercase tracking-widest text-on-secondary-container">
+      {{ current_user.university or current_user.department or 'Engineering Student' }}
+    </span>
+  </div>
+</section>
+
+<!-- Stats Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-0">
+  <div class="p-8 border-2 border-on-surface flex flex-col justify-between h-44 bg-surface-container-lowest">
+    <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Notes Uploaded</span>
+    <div>
+      <span class="text-5xl font-black text-primary italic">{{ note_count }}</span>
+      <p class="text-[10px] mt-1 text-slate-500 font-bold uppercase">
+        {% if note_count == 0 %}Start your first note{% elif note_count == 1 %}Good start!{% else %}Keep going!{% endif
+        %}
+      </p>
+    </div>
+  </div>
+  <div class="p-8 border-2 border-l-0 border-on-surface flex flex-col justify-between h-44 bg-secondary-container">
+    <span class="text-[10px] font-black uppercase tracking-widest text-on-secondary-container">Papers Generated</span>
+    <div>
+      <span class="text-5xl font-black text-on-secondary-container italic">{{ paper_count }}</span>
+      <p class="text-[10px] mt-1 text-on-secondary-container font-bold uppercase">
+        {% if paper_count == 0 %}Generate your first{% else %}Ready to practice{% endif %}
+      </p>
+    </div>
+  </div>
+  <div class="p-8 border-2 border-l-0 border-on-surface flex flex-col justify-between h-44 bg-surface-container-lowest">
+    <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Department</span>
+    <div>
+      <span class="text-5xl font-black text-primary italic">{{ current_user.department or '—' }}</span>
+      <p class="text-[10px] mt-1 text-slate-500 font-bold uppercase">Academic Branch</p>
+    </div>
+  </div>
+  <div class="p-8 border-2 border-l-0 border-on-surface flex flex-col justify-between h-44 bg-primary-container">
+    <span class="text-[10px] font-black uppercase tracking-widest text-on-primary-container">College/Campus</span>
+    <div>
+      <span class="text-5xl font-black text-on-primary-container italic">{{ current_user.university or '—' }}</span>
+      <p class="text-[10px] mt-1 text-on-primary-container font-bold uppercase">Study Institution</p>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Actions -->
+<section class="space-y-4">
+  <h3 class="text-xs font-black uppercase tracking-[0.4em] text-slate-400">Immediate Actions</h3>
+  <div class="flex flex-wrap gap-4">
+    <a href="{{ url_for('upload_note') }}">
+      <button
+        class="px-7 py-4 bg-white text-black font-black uppercase tracking-widest text-xs hover:bg-yellow-400 flex items-center gap-3 btn-brutalist transition-colors">
+        <span class="material-symbols-outlined">upload</span> Upload Note
+      </button>
+    </a>
+    <a href="{{ url_for('ai_tools') }}">
+      <button
+        class="px-7 py-4 bg-white text-black font-black uppercase tracking-widest text-xs hover:bg-yellow-400 flex items-center gap-3 btn-brutalist transition-colors">
+        <span class="material-symbols-outlined">auto_awesome</span> AI Tools
+      </button>
+    </a>
+    <a href="{{ url_for('generated_paper') }}">
+      <button
+        class="px-7 py-4 bg-white text-black font-black uppercase tracking-widest text-xs hover:bg-yellow-400 flex items-center gap-3 btn-brutalist transition-colors">
+        <span class="material-symbols-outlined">description</span> View Latest Paper
+      </button>
+    </a>
+    <a href="{{ url_for('library') }}">
+      <button
+        class="px-7 py-4 bg-white text-black font-black uppercase tracking-widest text-xs hover:bg-yellow-400 flex items-center gap-3 btn-brutalist transition-colors">
+        <span class="material-symbols-outlined">book_2</span> Library
+      </button>
+    </a>
+  </div>
+</section>
+
+<!-- Recent Notes -->
+<section class="space-y-6">
+  <div class="flex items-center justify-between border-b-2 border-on-surface pb-4">
+    <h3 class="text-3xl font-black text-on-surface italic">Your Recent Notes</h3>
+    <a class="text-xs font-bold uppercase tracking-widest text-primary hover:underline"
+      href="{{ url_for('library') }}">View All →</a>
+  </div>
+
+  {% if recent_notes %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    {% for note in recent_notes %}
+    <a href="{{ url_for('note_detail', note_id=note.id) }}" class="block group">
+      <div
+        class="bg-surface-container-lowest border-2 border-on-surface p-6 flex flex-col gap-4 hover:bg-slate-50 transition-colors hover:translate-x-0.5 hover:translate-y-0.5">
+        <div class="flex items-start justify-between">
+          <span class="bg-secondary-container px-2 py-0.5 text-[10px] font-black uppercase tracking-tighter">{{
+            note.subject[:20] }}</span>
+          <span class="material-symbols-outlined text-sm text-slate-400">open_in_new</span>
+        </div>
+        <h4 class="font-headline text-lg font-bold leading-tight group-hover:text-primary transition-colors">{{
+          note.title }}</h4>
+        <div class="flex flex-wrap gap-1 mt-auto">
+          {% for kw in note.keywords_list[:3] %}
+          <span class="border border-primary text-[9px] font-bold text-primary px-2 py-0.5 uppercase">{{ kw }}</span>
+          {% endfor %}
+        </div>
+        <p class="text-[10px] text-slate-400 font-bold uppercase">
+          {% if note.created_at and note.created_at.strftime %}{{ note.created_at.strftime('%d %b %Y') }}{% else
+          %}Recently{% endif %}
+        </p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="border-4 border-dashed border-outline-variant p-12 text-center">
+    <span class="material-symbols-outlined text-5xl text-slate-300 mb-3">note_add</span>
+    <h4 class="font-headline text-2xl font-black text-slate-500 mb-3">No notes yet</h4>
+    <p class="text-slate-400 text-sm mb-6">Upload your first note to get started with AI analysis.</p>
+    <a href="{{ url_for('upload_note') }}"
+      class="inline-block bg-primary text-white px-8 py-3 font-black uppercase tracking-widest text-xs btn-brutalist">
+      Upload First Note →
+    </a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  // Pass current hour to Jinja (done server-side via context processor or just use JS)
+  // Already handled in H2 greeting above via template logic
+</script>
+{% endblock %}
