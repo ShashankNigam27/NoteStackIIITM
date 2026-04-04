@@ -1,0 +1,42 @@
+<aside class="fixed left-0 top-0 h-full w-64 flex flex-col bg-slate-50 dark:bg-slate-900 border-r-0 z-50">
+  <div class="p-8">
+    <div class="text-2xl font-black uppercase text-red-700 dark:text-red-500 font-headline tracking-tight">
+      NoteStack
+    </div>
+    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">The Academic Radical</p>
+  </div>
+
+  <nav class="flex-1 px-4 space-y-2" id="sidebar-nav">
+    <a class="sidebar-link flex items-center gap-4 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-red-600 hover:bg-yellow-400/10 font-headline tracking-tight transition-colors duration-100"
+       href="{{ url_for('dashboard') }}" data-page="dashboard">
+      <span class="material-symbols-outlined">science</span>
+      <span>Dashboard</span>
+    </a>
+    <a class="sidebar-link flex items-center gap-4 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-red-600 hover:bg-yellow-400/10 font-headline tracking-tight transition-colors duration-100"
+       href="{{ url_for('library') }}" data-page="library">
+      <span class="material-symbols-outlined">book_2</span>
+      <span>Library</span>
+    </a>
+    <a class="sidebar-link flex items-center gap-4 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-red-600 hover:bg-yellow-400/10 font-headline tracking-tight transition-colors duration-100"
+       href="{{ url_for('ai_tools') }}" data-page="ai-tools">
+      <span class="material-symbols-outlined">auto_awesome</span>
+      <span>AI Tools</span>
+    </a>
+    <a class="sidebar-link flex items-center gap-4 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-red-600 hover:bg-yellow-400/10 font-headline tracking-tight transition-colors duration-100"
+       href="{{ url_for('analytics') }}" data-page="analytics">
+      <span class="material-symbols-outlined">edit_note</span>
+      <span>Analytics</span>
+    </a>
+    <a class="sidebar-link flex items-center gap-4 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-red-600 hover:bg-yellow-400/10 font-headline tracking-tight transition-colors duration-100"
+       href="{{ url_for('verify_papers') }}" data-page="verify-papers">
+      <span class="material-symbols-outlined">fact_check</span>
+      <span>Verify Papers</span>
+    </a>
+  </nav>
+
+  <div class="p-4 mt-auto">
+    <a href="{{ url_for('upload_note') }}"
+       class="block w-full bg-primary-container text-on-primary-container border border-primary py-3 font-bold uppercase tracking-widest text-xs btn-brutalist text-center">
+      + Upload Note
+    </a>
+  </div>

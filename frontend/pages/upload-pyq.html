@@ -1,0 +1,61 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}Upload PYQ | NoteStack{% endblock %}
+{% block page_title %}Upload PYQ Paper{% endblock %}
+
+{% block dashboard_content %}
+<div class="max-w-2xl space-y-6">
+  <p class="text-slate-600 text-sm">
+    Upload a previous year question paper. It will go through OCR extraction and be submitted for peer verification before becoming available in the library.
+  </p>
+
+  <form id="pyq-upload-form" class="space-y-6">
+    <div>
+      <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Subject</label>
+      <input type="text" id="pyq-subject"
+             class="w-full border-b-2 border-outline px-0 py-2 bg-transparent font-body text-sm focus:border-primary focus:border-b-4 outline-none transition-all"
+             placeholder="e.g. Data Structures and Algorithms" required />
+    </div>
+
+    <div>
+      <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">University</label>
+      <input type="text" id="pyq-university"
+             class="w-full border-b-2 border-outline px-0 py-2 bg-transparent font-body text-sm focus:border-primary focus:border-b-4 outline-none transition-all"
+             placeholder="e.g. RGPV"
+             value="{{ current_user.university or '' }}" />
+    </div>
+
+    <div>
+      <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Year</label>
+      <input type="text" id="pyq-year"
+             class="w-full border-b-2 border-outline px-0 py-2 bg-transparent font-body text-sm focus:border-primary focus:border-b-4 outline-none transition-all"
+             placeholder="e.g. 2023" />
+    </div>
+
+    <div>
+      <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Paper File (PDF or Image)</label>
+      <input type="file" id="pyq-file" accept=".pdf,.jpg,.jpeg,.png"
+             class="w-full text-sm font-body" required />
+    </div>
+
+    <button type="submit" id="pyq-submit-btn"
+            class="bg-primary text-white px-8 py-3 font-bold uppercase tracking-widest text-xs btn-brutalist">
+      Submit for Verification →
+    </button>
+  </form>
+
+  <!-- Loading state -->
+  <div id="pyq-loading" class="hidden flex items-center gap-3 text-slate-500 text-sm">
+    <span class="material-symbols-outlined animate-spin">hourglass_empty</span>
+    Uploading and extracting text via OCR...
+  </div>
+
+  <!-- Result -->
+  <div id="pyq-result" class="hidden p-6 border-2 border-black bg-yellow-400/10">
+    <p class="text-xs font-bold uppercase tracking-widest text-red-700 mb-2">Paper Submitted</p>
+    <p class="text-sm text-slate-600" id="pyq-status-msg"></p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
