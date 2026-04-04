@@ -146,3 +146,150 @@
 
 {% block scripts %}
 {{ super() }}
+
+<script>
+  (function () {
+    const form = document.getElementById('upload-form');
+    const fileInput = document.getElementById('file-input');
+    const zone = document.getElementById('upload-zone');
+    const fileDisplay = document.getElementById('file-name-display');
+    const progressWrap = document.getElementById('progress-wrap');
+    const progressBar = document.getElementById('progress-bar');
+    const progressPct = document.getElementById('progress-pct');
+    const progressMsg = document.getElementById('progress-msg');
+    const progressLbl = document.getElementById('progress-label');
+    const resultsPanel = document.getElementById('results-panel');
+    const uploadBtn = document.getElementById('upload-btn');
+
+
+    // Drag & drop visual feedback
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      if (e.dataTransfer.files[0]) {
+        fileInput.files = e.dataTransfer.files;
+        showFileName(e.dataTransfer.files[0].name);
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) showFileName(fileInput.files[0].name);
+    });
+
+    function showFileName(name) {
+      fileDisplay.textContent = '📄 ' + name;
+      fileDisplay.classList.remove('hidden');
+    }
+
+    function setProgress(pct, msg, label) {
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+      if (msg) progressMsg.textContent = msg;
+      if (label) progressLbl.textContent = label;
+    }
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const file = fileInput.files[0];
+      const title = document.getElementById('note-title').value.trim();
+      const subject = document.getElementById('note-subject').value.trim();
+      const university = document.getElementById('note-university').value.trim();
+      const uploadType = document.getElementById('upload-type').value;
+
+      if (!file) { alert('Please select a file.'); return; }
+      if (!title) { alert('Please enter a title.'); return; }
+      if (!subject) { alert('Please enter the subject.'); return; }
+
+      // Show progress
+      progressWrap.classList.remove('hidden');
+      uploadBtn.disabled = true;
+      uploadBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">hourglass_empty</span> Processing...';
+      resultsPanel.classList.add('hidden');
+
+      setProgress(10, 'Uploading file to server...', 'Uploading');
+      try {
+        setProgress(30, 'Running OCR text extraction...', 'Extracting Text');
+        const data = await window.API.uploadNote(file, subject, university, uploadType);
+        setProgress(70, 'AI is parsing content and mapping knowledge...', 'AI Analysis');
+        setProgress(100, 'Complete!', 'Done ✓');
+
+        if (!data.success) {
+          alert('Upload failed: ' + (data.error || 'Unknown error'));
+          resetBtn();
+          return;
+        }
+
+        // Show results
+        setTimeout(() => {
+          progressWrap.classList.add('hidden');
+          showResults(data);
+          resetBtn();
+        }, 500);
+
+      } catch (err) {
+        alert('Upload error: ' + err.message);
+        progressWrap.classList.add('hidden');
+        resetBtn();
+      }
+    });
+
+    function resetBtn() {
+      uploadBtn.disabled = false;
+      uploadBtn.innerHTML = '<span class="material-symbols-outlined">upload</span> Upload to Prep Library';
+    }
+
+    function showResults(data) {
+      resultsPanel.classList.remove('hidden');
+      resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      document.getElementById('results-summary-meta').textContent =
+        `Extracted ${data.char_count || 0} characters · ${data.keywords?.length || 0} keywords identified`;
+
+      // Keywords chips
+      const kwContainer = document.getElementById('keywords-container');
+      kwContainer.innerHTML = '';
+      (data.keywords || []).forEach(kw => {
+        const span = document.createElement('div');
+        span.className = 'bg-secondary-container px-4 py-2 font-bold text-sm uppercase tracking-tighter border-2 border-black';
+        span.textContent = '# ' + kw;
+        kwContainer.appendChild(span);
+      });
+
+      // Summary
+      document.getElementById('summary-text').textContent = data.summary || 'No summary generated.';
+
+      // Buttons
+      document.getElementById('view-note-btn').href = '/note-detail/' + data.note_id;
+      document.getElementById('generate-paper-btn').href = '#';
+      document.getElementById('generate-paper-btn').onclick = function (e) {
+        e.preventDefault();
+        generatePaper(data.note_id);
+      };
+    }
+
+    async function generatePaper(noteId) {
+      const btn = document.getElementById('generate-paper-btn');
+      btn.textContent = 'Generating...';
+      btn.disabled = true;
+      try {
+        const data = await window.API.generatePaper(noteId);
+        if (data.success) {
+          window.location.href = '/generated-paper/' + data.paper_id;
+        } else {
+          alert('Paper generation failed.');
+          btn.textContent = 'Generate Paper from This Note';
+          btn.disabled = false;
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+        btn.textContent = 'Generate Paper from This Note';
+        btn.disabled = false;
+      }
+    }
+
+  })();
+</script>
+{% endblock %}

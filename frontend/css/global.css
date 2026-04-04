@@ -74,3 +74,90 @@ h6,
 .hard-shadow {
     box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
 }
+
+.brutalist-toast {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    z-index: 100;
+    background: #fed01b;
+    /* Mustard Yellow */
+    border: 3px solid #000;
+    padding: 1rem 2rem;
+    color: #000;
+    transform: translate(0, 0);
+    box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.05em;
+    animation: toast-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes toast-in {
+    from {
+        transform: translate(20px, -20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+}
+
+/* 
+  Standard 4px Button Shadow (The default for NoteStack UI)
+*/
+.btn-brutalist {
+    border: 2px solid #000;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+    transition: all 0.1s ease-in-out;
+    transform: translate(0, 0);
+}
+
+.btn-brutalist:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
+}
+
+/* 
+  Enlarged 8px Button Shadow (Special for CTA buttons like 'Join the University')
+*/
+.btn-brutalist-lg {
+    border: 3px solid #000;
+    box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
+    transition: all 0.1s ease-in-out;
+    transform: translate(0, 0);
+}
+
+.btn-brutalist-lg:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
+}
+
+/* Standardized Post-Login Architecture Elements */
+.active-nav-border {
+    border-left: 4px solid #b70011;
+}
+
+/* Global Form & Input Enhancements */
+.input-academic:focus,
+input:focus,
+select:focus {
+    outline: none !important;
+    border-bottom-width: 4px !important;
+    border-color: #b70011 !important;
+}
+
+/* Custom checkbox appearance */
+input[type="checkbox"] {
+    border-radius: 0px;
+    border: 2px solid #916f6b;
+    color: #b70011;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #fed01b;
+    border-color: #735c00;
+}
