@@ -1,0 +1,148 @@
+% extends 'dashboard_base.html' %}
+{% block title %}Upload Note | NoteStack{% endblock %}
+{% block page_title %}Upload Note{% endblock %}
+
+{% block extra_styles %}
+.upload-zone { transition: all 0.2s ease; }
+.upload-zone.drag-over { background: #fef9c3; border-color: #b70011; }
+.progress-bar { transition: width 0.4s ease; }
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="max-w-5xl mx-auto space-y-8">
+
+  <!-- Header -->
+  <div>
+    <span
+      class="bg-secondary-container px-3 py-1 text-xs font-black uppercase tracking-widest text-on-secondary-container">Note
+      & PYQ Upload</span>
+    <h1 class="text-5xl font-headline font-black mt-3 tracking-tighter text-on-surface">Upload Your Note</h1>
+    <p class="text-base font-body text-neutral-600 mt-2 max-w-2xl">
+      Upload a PDF or image of your notes. Our AI will automatically extract keywords and generate an exam-focused
+      summary.
+    </p>
+  </div>
+
+  <form id="upload-form" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+    <!-- Left: Upload Zone -->
+    <div class="lg:col-span-7 space-y-6">
+
+      <!-- Drop zone -->
+      <div id="upload-zone"
+        class="upload-zone relative w-full h-72 border-4 border-dashed border-primary-container bg-surface-container-lowest flex flex-col items-center justify-center p-8 text-center cursor-pointer hover:bg-red-50">
+        <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png"
+          class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+        <span class="material-symbols-outlined text-6xl text-primary mb-4"
+          style="font-variation-settings:'wght' 200">cloud_upload</span>
+        <h3 class="text-xl font-headline font-bold mb-1">Drop file here or click to browse</h3>
+        <p class="text-neutral-500 font-body text-sm">PDF, JPG, or PNG — Max 50 MB</p>
+        <div id="file-name-display" class="mt-4 text-sm font-bold text-primary hidden"></div>
+      </div>
+
+      <!-- Progress bar -->
+      <div id="progress-wrap" class="hidden space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-black uppercase tracking-widest text-primary"
+            id="progress-label">Processing...</span>
+          <span class="text-sm font-bold font-headline" id="progress-pct">0%</span>
+        </div>
+        <div class="w-full h-3 bg-surface-container-high overflow-hidden">
+          <div id="progress-bar" class="progress-bar h-full bg-primary" style="width:0%"></div>
+        </div>
+        <p class="text-xs italic text-neutral-500" id="progress-msg">Uploading file...</p>
+      </div>
+
+    </div>
+
+    <!-- Right: Metadata -->
+    <div class="lg:col-span-5 bg-surface-container-low p-8 border-l-8 border-secondary-container space-y-6">
+      <h2 class="text-2xl font-headline font-bold">Upload Details</h2>
+
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1">Content Type</label>
+        <select id="upload-type" name="type"
+          class="w-full bg-transparent border-b-2 border-outline py-2 focus:border-primary focus:border-b-4 outline-none font-bold text-sm transition-all cursor-pointer">
+          <option value="note">📚 Study Note / Lecture Notes</option>
+          <option value="pyq">📜 Past Year Paper (PYQ)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1">Title *</label>
+        <input id="note-title" name="title" type="text"
+          class="w-full bg-transparent border-b-2 border-outline py-2 focus:border-primary focus:border-b-4 outline-none font-bold text-sm transition-all"
+          placeholder="e.g. Signal Processing Unit 2 Notes" required />
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1">Subject *</label>
+        <input id="note-subject" name="subject" type="text"
+          class="w-full bg-transparent border-b-2 border-outline py-2 focus:border-primary focus:border-b-4 outline-none font-bold text-sm transition-all"
+          placeholder="e.g. Digital Signal Processing" required />
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-neutral-500 mb-1">University</label>
+        <input id="note-university" name="university" type="text"
+          class="w-full bg-transparent border-b-2 border-outline py-2 focus:border-primary focus:border-b-4 outline-none font-bold text-sm transition-all"
+          value="{{ current_user.university or '' }}" placeholder="e.g. VTU, Anna University, or NIT" />
+      </div>
+
+      <button type="submit" id="upload-btn"
+        class="w-full bg-primary text-white py-4 text-sm font-black uppercase tracking-[0.2em] btn-brutalist hover:bg-red-800 transition-colors flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined">upload</span>
+        Upload to Prep Library
+      </button>
+    </div>
+  </form>
+
+  <!-- Results panel (hidden until upload completes) -->
+  <div id="results-panel" class="hidden border-t-4 border-surface-container-high pt-8 space-y-6">
+
+    <div class="flex items-start gap-6">
+      <div class="bg-secondary-container p-4 flex-shrink-0">
+        <span class="material-symbols-outlined text-3xl text-black"
+          style="font-variation-settings:'FILL' 1">check_circle</span>
+      </div>
+      <div>
+        <h2 class="text-3xl font-headline font-black tracking-tight mb-1">Extraction Complete</h2>
+        <p class="text-neutral-600 text-sm" id="results-summary-meta"></p>
+      </div>
+    </div>
+
+    <!-- Keywords -->
+    <div>
+      <p class="text-xs font-black uppercase tracking-widest text-neutral-500 mb-3">Extracted Keywords</p>
+      <div id="keywords-container" class="flex flex-wrap gap-2"></div>
+    </div>
+
+    <!-- AI Summary -->
+    <div class="bg-surface-container-low p-6 border-l-4 border-secondary-container">
+      <p class="text-xs font-black uppercase tracking-widest text-neutral-500 mb-3">AI Summary</p>
+      <p id="summary-text" class="text-sm text-on-surface font-body leading-relaxed whitespace-pre-line"></p>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex gap-4 flex-wrap">
+      <a id="view-note-btn" href="#"
+        class="px-6 py-3 bg-primary text-white font-bold uppercase tracking-widest text-xs btn-brutalist">
+        View Note Detail →
+      </a>
+      <a id="generate-paper-btn" href="#"
+        class="px-6 py-3 border-2 border-primary text-primary font-bold uppercase tracking-widest text-xs btn-brutalist hover:bg-primary hover:text-white transition-colors">
+        Generate Paper from This Note
+      </a>
+      <button
+        onclick="document.getElementById('upload-form').reset(); document.getElementById('results-panel').classList.add('hidden'); document.getElementById('file-name-display').classList.add('hidden');"
+        class="px-6 py-3 border-2 border-neutral-400 text-neutral-600 font-bold uppercase tracking-widest text-xs btn-brutalist">
+        Upload Another
+      </button>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
