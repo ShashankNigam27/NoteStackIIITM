@@ -297,6 +297,83 @@ def topic_frequency(university, subject):
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+# ── GET /api/ai/training-log ──────────────────────────────────
+
+@ai_bp.route('/training-log', methods=['GET'])
+@login_required
+def training_log():
+    """
+    Returns the last N lines of training_debug.log plus live training
+    status for every university/subject pair tracked in Firestore.
+
+    Query params:
+        lines  (int, default 100)  — how many tail lines to return
+        university / subject       — optional filter for status
+    """
+    import os
+
+    lines_requested = min(int(request.args.get('lines', 100)), 500)
+    university      = request.args.get('university', '')
+    subject         = request.args.get('subject', '')
+
+    # ── Read log file ─────────────────────────────────────
+    log_path = os.path.join(os.path.dirname(__file__), '..', 'training_debug.log')
+    log_path = os.path.normpath(log_path)
+
+    log_lines    = []
+    log_exists   = os.path.exists(log_path)
+    log_size_kb  = 0
+
+    if log_exists:
+        log_size_kb = round(os.path.getsize(log_path) / 1024, 1)
+        try:
+            with open(log_path, 'r', encoding='utf-8', errors='replace') as f:
+                all_lines = f.readlines()
+            log_lines = [l.rstrip() for l in all_lines[-lines_requested:]]
+        except Exception as e:
+            log_lines = [f"[ERROR reading log] {e}"]
+
+    # ── Live training status from Firestore ──────────────────
+    training_status = []
+    try:
+        from services.firebase_service import get_firestore
+        db = get_firestore()
+        if db:
+            from google.cloud.firestore_v1.base_query import FieldFilter
+            query = db.collection('model_training_status')
+            if university:
+                query = query.where(filter=FieldFilter('university', '==', university))
+            if subject:
+                query = query.where(filter=FieldFilter('subject', '==', subject))
+            for doc in query.stream():
+                d = doc.to_dict()
+                training_status.append({
+                    'university':  d.get('university', ''),
+                    'subject':     d.get('subject', ''),
+                    'is_training': d.get('is_training', False),
+                    'updated_at':  str(d.get('updated_at', '')),
+                })
+    except Exception as e:
+        training_status = [{'error': str(e)}]
+
+    # ── Available trained models (disk) ─────────────────────
+    try:
+        from services.model_manager import list_available_models
+        available_models = list_available_models()
+    except Exception as e:
+        available_models = []
+
+    return jsonify({
+        'success':          True,
+        'log_exists':       log_exists,
+        'log_size_kb':      log_size_kb,
+        'lines_returned':   len(log_lines),
+        'log':              log_lines,
+        'training_status':  training_status,
+        'available_models': available_models,
+    }), 200
+
+
 # ═══════════════════════════════════════════════════════════════
 # INTERNAL HELPERS
 # ═══════════════════════════════════════════════════════════════

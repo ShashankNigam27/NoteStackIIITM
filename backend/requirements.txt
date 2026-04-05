@@ -7,7 +7,7 @@ pytesseract
 Pillow 
 scikit-learn 
 numpy 
-torch 
+torch==2.10.0+cpu
 transformers
 sentencepiece 
 google-genai 
@@ -18,3 +18,4 @@ rouge-score
 flask-login
 dotenv
 extensions
+accelerate
